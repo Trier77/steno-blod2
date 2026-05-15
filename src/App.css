@@ -1,1 +1,31 @@
 @import "tailwindcss";
+
+@theme {
+  --color-museum-cream: #f2f1da;
+  --color-museum-blue: #c1cddb;
+  --color-museum-crimson: #631d27;
+  --font-flama: "Flama", sans-serif;
+  --color-primary: #39516f;
+}
+
+@font-face {
+  font-family: "Flama";
+  src: url("./assets/fonts/flamatrial-book.otf") format("opentype");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "Flama";
+  src: url("./assets/fonts/flamatrial-basic.otf") format("opentype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Flama";
+  src: url("./assets/fonts/flamatrial-semibold.otf") format("opentype");
+  font-weight: 600;
+}
+
+body {
+  background-color: #f2f1da;
+}
