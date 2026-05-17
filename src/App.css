@@ -29,3 +29,7 @@
 body {
   background-color: #f2f1da;
 }
+
+.quarter-circle {
+  border-bottom-right-radius: 100%;
+}

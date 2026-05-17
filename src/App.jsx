@@ -1,17 +1,18 @@
-import { useState } from 'react'
-import { Route, Routes } from 'react-router'
-import StartSide from './pages/StartSide'
-import './App.css'
+import { Route, Routes } from "react-router";
+import { LanguageProvider } from "./context/LanguageContext";
+import StartSide from "./pages/StartSide";
+import Quiz from "./pages/Quiz";
+import "./App.css";
 
 function App() {
-  
-
   return (
-    <Routes>
-      <Route path="/" element={<StartSide />} />
-      
-    </Routes>
-  )
+    <LanguageProvider>
+      <Routes>
+        <Route path="/" element={<StartSide />} />
+        <Route path="/quiz" element={<Quiz />} />
+      </Routes>
+    </LanguageProvider>
+  );
 }
 
-export default App
+export default App;

@@ -1,0 +1,428 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../../translations";
+import BackButton from "../components/BackButton";
+
+const STORAGE_KEY = "museum_quiz_scores";
+const ATTEMPTS_KEY = "museum_quiz_attempts";
+
+function loadScores() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveScore(score, total) {
+  try {
+    const existing = loadScores();
+    const entry = { score, total, date: Date.now() };
+    const updated = [...existing, entry].slice(-5000);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [{ score, total, date: Date.now() }];
+  }
+}
+
+function loadAttemptCount() {
+  try {
+    return parseInt(localStorage.getItem(ATTEMPTS_KEY) || "0", 10);
+  } catch {
+    return 0;
+  }
+}
+
+function incrementAttempts() {
+  try {
+    const next = loadAttemptCount() + 1;
+    localStorage.setItem(ATTEMPTS_KEY, String(next));
+    return next;
+  } catch {
+    return 1;
+  }
+}
+
+function calcStats(allScores, myScore, total) {
+  const previous = allScores.slice(0, -1);
+  const myRatio = myScore / total;
+  let percentile = 50;
+  if (previous.length > 0) {
+    const beaten = previous.filter((s) => s.score / s.total < myRatio).length;
+    percentile = Math.round((beaten / previous.length) * 100);
+  }
+  return { percentile, totalAttempts: loadAttemptCount() };
+}
+
+function useCountUp(target, duration = 1200, startDelay = 0) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    setValue(0);
+    let timeout;
+    timeout = setTimeout(() => {
+      const startTime = performance.now();
+      const step = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(eased * target));
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, startDelay);
+    return () => clearTimeout(timeout);
+  }, [target, duration, startDelay]);
+  return value;
+}
+
+if (typeof document !== "undefined" && !document.getElementById("quiz-style")) {
+  const s = document.createElement("style");
+  s.id = "quiz-style";
+  s.textContent = `
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-slide-up { animation: fadeSlideUp 0.6s ease forwards; }
+    @keyframes heartbeat {
+      0%   { transform: scale(1); }
+      14%  { transform: scale(1.06); }
+      28%  { transform: scale(1); }
+      42%  { transform: scale(1.04); }
+      70%  { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+    .heartbeat { animation: heartbeat 1.6s ease-in-out infinite; }
+  `;
+  document.head.appendChild(s);
+}
+
+const SCREEN_QUESTION = "question";
+const SCREEN_EXPLANATION = "explanation";
+const SCREEN_RESULTS = "results";
+
+function Quiz() {
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language].quiz;
+
+  const [screen, setScreen] = useState(SCREEN_QUESTION);
+  const [fadeIn, setFadeIn] = useState(true);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [wasCorrect, setWasCorrect] = useState(null);
+  const [showCorrect, setShowCorrect] = useState(false);
+  const [score, setScore] = useState(0);
+  const [stats, setStats] = useState(null);
+  const [showQuitDialog, setShowQuitDialog] = useState(false);
+  const [quitVisible, setQuitVisible] = useState(false);
+
+  const question = t.questions[currentQ];
+  const isActiveQuiz =
+    screen === SCREEN_QUESTION || screen === SCREEN_EXPLANATION;
+
+  const transitionTo = (nextScreen) => {
+    setFadeIn(false);
+    setTimeout(() => {
+      setScreen(nextScreen);
+      setFadeIn(true);
+    }, 300);
+  };
+
+  const handleAnswer = (index) => {
+    if (selectedAnswer !== null) return;
+    const correct = index === question.correct;
+    setSelectedAnswer(index);
+    setWasCorrect(correct);
+    if (correct) setScore((s) => s + 1);
+    setTimeout(() => setShowCorrect(true), 800);
+    setTimeout(() => transitionTo(SCREEN_EXPLANATION), 1600);
+  };
+
+  const handleNext = () => {
+    const nextQ = currentQ + 1;
+    setSelectedAnswer(null);
+    setShowCorrect(false);
+    setWasCorrect(null);
+    if (nextQ >= t.questions.length) {
+      incrementAttempts();
+      const allScores = saveScore(score, t.questions.length);
+      const computed = calcStats(allScores, score, t.questions.length);
+      setStats(computed);
+      transitionTo(SCREEN_RESULTS);
+    } else {
+      setCurrentQ(nextQ);
+      transitionTo(SCREEN_QUESTION);
+    }
+  };
+
+  const handlePlayAgain = () => {
+    setCurrentQ(0);
+    setScore(0);
+    setSelectedAnswer(null);
+    setWasCorrect(null);
+    setShowCorrect(false);
+    setStats(null);
+    transitionTo(SCREEN_QUESTION);
+  };
+
+  const handleBackAttempt = () => {
+    if (isActiveQuiz) {
+      setShowQuitDialog(true);
+      setTimeout(() => setQuitVisible(true), 10);
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleConfirmQuit = () => {
+    setQuitVisible(false);
+    setTimeout(() => {
+      setShowQuitDialog(false);
+      navigate("/");
+    }, 300);
+  };
+
+  const handleCancelQuit = () => {
+    setQuitVisible(false);
+    setTimeout(() => setShowQuitDialog(false), 300);
+  };
+
+  const getOptionStyle = (index) => {
+    if (selectedAnswer === null) {
+      return "bg-museum-blue text-primary hover:bg-museum-blue/80";
+    }
+    if (!showCorrect) {
+      if (index === selectedAnswer) return "bg-primary text-museum-cream";
+      return "bg-museum-blue text-primary opacity-50";
+    }
+    if (index === question.correct) return "bg-green-600 text-white";
+    if (index === selectedAnswer && !wasCorrect)
+      return "bg-museum-crimson text-museum-cream";
+    return "bg-museum-blue text-primary opacity-50";
+  };
+
+  return (
+    <div className="w-screen h-screen bg-museum-cream flex flex-col overflow-hidden select-none font-flama">
+      <BackButton onClick={handleBackAttempt} />
+
+      {/* Quit dialog */}
+      {showQuitDialog && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center"
+          style={{
+            backgroundColor: `rgba(0,0,0,${quitVisible ? 0.4 : 0})`,
+            transition: "background-color 0.3s ease",
+          }}
+        >
+          <div
+            className="bg-museum-cream rounded-3xl p-16 max-w-2xl w-full mx-8 flex flex-col items-center gap-8"
+            style={{
+              opacity: quitVisible ? 1 : 0,
+              transform: quitVisible ? "translateY(0)" : "translateY(20px)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+            }}
+          >
+            <h3 className="text-primary text-4xl font-semibold text-center">
+              {t.quitTitle}
+            </h3>
+            <p className="text-primary/70 text-2xl text-center leading-relaxed font-light">
+              {t.quitBody}
+            </p>
+            <div className="flex flex-col gap-4 w-full">
+              <button
+                onClick={handleConfirmQuit}
+                className="w-full bg-museum-crimson text-museum-cream font-semibold text-2xl rounded-full py-5"
+              >
+                {t.quitConfirm}
+              </button>
+              <button
+                onClick={handleCancelQuit}
+                className="w-full bg-museum-blue text-primary font-semibold text-2xl rounded-full py-5"
+              >
+                {t.quitCancel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div
+        className="flex flex-col flex-1 px-32 py-16"
+        style={{
+          opacity: fadeIn ? 1 : 0,
+          transform: fadeIn ? "translateY(0)" : "translateY(16px)",
+          transition: "opacity 0.3s ease, transform 0.3s ease",
+        }}
+      >
+        {/* QUESTION */}
+        {screen === SCREEN_QUESTION && (
+          <div className="flex flex-col h-full">
+            {/* Question */}
+            <div className="flex-1 flex items-center justify-center px-16">
+              <h2 className="text-primary text-4xl font-semibold text-center leading-snug">
+                {question.question}
+              </h2>
+            </div>
+
+            {/* 2x2 options grid */}
+            <div className="grid grid-cols-2 gap-5 mb-8">
+              {question.options.map((option, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAnswer(i)}
+                  className={`rounded-2xl px-8 py-8 font-semibold text-2xl text-center transition-all duration-500 ${getOptionStyle(i)}`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-3 mb-4">
+              {t.questions.map((_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-full bg-primary transition-all duration-300 ${
+                    i === currentQ
+                      ? "w-5 h-5 opacity-100"
+                      : "w-3 h-3 opacity-30"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* EXPLANATION */}
+        {screen === SCREEN_EXPLANATION && (
+          <div className="flex flex-col items-center justify-between h-full">
+            <div className="flex-1 flex flex-col items-center justify-center gap-10 px-16">
+              <span className="text-primary text-6xl font-semibold">
+                {wasCorrect ? t.correctLabel : t.wrongLabel}
+              </span>
+              <p className="text-primary/80 text-3xl text-center leading-relaxed font-light">
+                {question.explanation}
+              </p>
+            </div>
+            <button
+              onClick={handleNext}
+              className="bg-museum-crimson text-museum-cream font-semibold text-2xl rounded-full px-16 py-5 mb-4 hover:opacity-90 transition-opacity duration-200"
+            >
+              {currentQ + 1 >= t.questions.length ? t.resultsTitle : t.nextBtn}
+            </button>
+          </div>
+        )}
+
+        {/* RESULTS */}
+        {screen === SCREEN_RESULTS && stats && (
+          <ResultsScreen
+            score={score}
+            total={t.questions.length}
+            stats={stats}
+            t={t}
+            onPlayAgain={handlePlayAgain}
+            onHome={() => navigate("/")}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
+  const animatedScore = useCountUp(score, 900, 200);
+  const animatedPct = useCountUp(stats.percentile, 1400, 700);
+  const [showPercentile, setShowPercentile] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setShowPercentile(true), 900);
+    const t2 = setTimeout(() => setShowButtons(true), 1800);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-between h-full px-16 pt-12 pb-10">
+      {/* Two cards side by side */}
+      <div className="flex gap-10 w-full flex-1 mb-10">
+        {/* Score card */}
+        <div className="flex-1 bg-museum-blue/40 rounded-3xl flex flex-col items-center justify-center gap-4">
+          <h2 className="text-primary text-4xl font-semibold fade-slide-up">
+            {t.resultsHeading}
+          </h2>
+          <p
+            className="text-primary font-semibold leading-none fade-slide-up"
+            style={{ fontSize: "8rem", animationDelay: "100ms", opacity: 0 }}
+          >
+            {animatedScore}
+            <span className="opacity-30" style={{ fontSize: "4rem" }}>
+              /{total}
+            </span>
+          </p>
+        </div>
+
+        {/* Percentile card */}
+        <div
+          className="flex-1 bg-museum-blue/40 rounded-3xl flex flex-col items-center justify-center gap-4"
+          style={{
+            opacity: showPercentile ? 1 : 0,
+            transform: showPercentile ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 0.7s ease, transform 0.7s ease",
+          }}
+        >
+          <p className="text-primary text-3xl font-light text-center">
+            {t.resultsBetterThan}
+          </p>
+          <p
+            className={`text-primary font-semibold leading-none${showPercentile ? " heartbeat" : ""}`}
+            style={{ fontSize: "8rem" }}
+          >
+            {animatedPct}%
+          </p>
+          <p className="text-primary text-3xl font-light text-center">
+            {t.resultsOfVisitors}
+          </p>
+          <p className="text-primary/40 text-center text-lg mt-1">
+            {t.resultsBasedOn}{" "}
+            <span className="font-semibold text-2xl">
+              {stats.totalAttempts}
+            </span>{" "}
+            {t.resultsAttempts}
+          </p>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div
+        className="flex flex-col items-center gap-5 w-1/2"
+        style={{
+          opacity: showButtons ? 1 : 0,
+          transform: showButtons ? "translateY(0)" : "translateY(12px)",
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+        }}
+      >
+        <button
+          onClick={onPlayAgain}
+          className="w-full bg-museum-crimson text-museum-cream font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
+        >
+          {t.playAgainBtn}
+        </button>
+        <button
+          onClick={onHome}
+          className="w-full bg-museum-blue text-primary font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
+        >
+          {t.backBtn}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default Quiz;

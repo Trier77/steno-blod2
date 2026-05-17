@@ -1,45 +1,75 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../../translations";
+import FlagButton from "../components/FlagButton";
+import ConfirmDialog from "../components/ConfirmDialogue";
 
 function StartSide() {
   const navigate = useNavigate();
+  const { language, visible } = useLanguage();
+  const t = translations[language].startside;
+  const tQuiz = translations[language].quiz;
+
+  const [showQuizIntro, setShowQuizIntro] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const openQuizIntro = () => {
+    setShowQuizIntro(true);
+    setTimeout(() => setDialogVisible(true), 10);
+  };
+
+  const closeQuizIntro = () => {
+    setDialogVisible(false);
+    setTimeout(() => setShowQuizIntro(false), 300);
+  };
+
+  const handleStartQuiz = () => {
+    setDialogVisible(false);
+    setTimeout(() => navigate("/quiz"), 300);
+  };
 
   return (
-    <div className="w-screen h-screen bg-museum-cream flex flex-col overflow-hidden select-none font-flama">
+    <div
+      className={`w-screen h-screen bg-museum-cream flex flex-col overflow-hidden select-none font-flama transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      {showQuizIntro && (
+        <ConfirmDialog
+          visible={dialogVisible}
+          title={tQuiz.title}
+          body={tQuiz.intro}
+          confirmLabel={tQuiz.startBtn}
+          cancelLabel={tQuiz.quitCancel}
+          onConfirm={handleStartQuiz}
+          onCancel={closeQuizIntro}
+        />
+      )}
+
       {/* Header */}
-      <header className="flex items-center justify-between px-20 pt-14 pb-6">
+      <header className="flex items-center justify-between px-20 pt-14 pb-10">
         <div>
           <p className="text-primary tracking-[0.3em] uppercase text-sm font-light">
-            Museum Name
+            {t.museumName}
           </p>
           <h1 className="text-primary text-5xl font-semibold leading-tight mt-1">
-            Exhibition Title
+            {t.exhibitionTitle}
           </h1>
         </div>
-        <div className="w-24 h-24 rounded-full bg-museum-blue flex items-center justify-center">
-          <span className="text-primary text-2xl font-semibold">M</span>
-        </div>
+        <FlagButton />
       </header>
 
-      {/* Divider */}
-      <div className="mx-20 h-px bg-museum-crimson opacity-20" />
-
       {/* Main content */}
-      <main className="flex flex-1 gap-10 px-20 py-12">
+      <main className="flex flex-1 gap-10 px-20 pb-12">
         {/* Video 1 */}
         <button
           onClick={() => navigate("/video/1")}
           className="flex-1 relative rounded-2xl overflow-hidden bg-museum-blue group cursor-pointer border-2 border-transparent hover:border-museum-crimson transition-all duration-300"
         >
-          <div className="absolute inset-0 bg-museum-blue flex items-center justify-center">
-            <span className="text-primary opacity-40 text-lg tracking-widest uppercase">
-              Video thumbnail
-            </span>
-          </div>
-
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-museum-crimson/0 group-hover:bg-museum-crimson/10 transition-all duration-300">
-            <div className="w-20 h-20 rounded-full bg-museum-cream/80 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+          {/* <img src="/thumbnails/video1.jpg" className="absolute inset-0 w-full h-full object-cover" /> */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-museum-cream/20 border-2 border-museum-cream/60 flex items-center justify-center group-hover:scale-110 group-hover:bg-museum-cream/30 transition-all duration-300">
               <svg
-                className="w-8 h-8 text-primary ml-1"
+                className="w-10 h-10 text-museum-cream ml-1"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -47,13 +77,12 @@ function StartSide() {
               </svg>
             </div>
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-museum-crimson/80 to-transparent">
-            <p className="tracking-widest uppercase text-xs text-museum-cream mb-1 opacity-80 font-light">
-              Film 1
+          <div className="absolute bottom-0 left-0 right-0 px-6 py-5">
+            <p className="tracking-widest uppercase text-xs text-museum-cream/70 mb-1 font-light">
+              {t.video1.label}
             </p>
             <h2 className="text-museum-cream text-2xl font-semibold">
-              Video Title Placeholder
+              {t.video1.title}
             </h2>
           </div>
         </button>
@@ -63,16 +92,11 @@ function StartSide() {
           onClick={() => navigate("/video/2")}
           className="flex-1 relative rounded-2xl overflow-hidden bg-museum-blue group cursor-pointer border-2 border-transparent hover:border-museum-crimson transition-all duration-300"
         >
-          <div className="absolute inset-0 bg-museum-blue flex items-center justify-center">
-            <span className="text-primary opacity-40 text-lg tracking-widest uppercase">
-              Video thumbnail
-            </span>
-          </div>
-
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-museum-crimson/0 group-hover:bg-museum-crimson/10 transition-all duration-300">
-            <div className="w-20 h-20 rounded-full bg-museum-cream/80 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+          {/* <img src="/thumbnails/video2.jpg" className="absolute inset-0 w-full h-full object-cover" /> */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-museum-cream/20 border-2 border-museum-cream/60 flex items-center justify-center group-hover:scale-110 group-hover:bg-museum-cream/30 transition-all duration-300">
               <svg
-                className="w-8 h-8 text-primary ml-1"
+                className="w-10 h-10 text-museum-cream ml-1"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -80,23 +104,22 @@ function StartSide() {
               </svg>
             </div>
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-museum-crimson/80 to-transparent">
-            <p className="tracking-widest uppercase text-xs text-museum-cream mb-1 opacity-80 font-light">
-              Film 2
+          <div className="absolute bottom-0 left-0 right-0 px-6 py-5">
+            <p className="tracking-widest uppercase text-xs text-museum-cream/70 mb-1 font-light">
+              {t.video2.label}
             </p>
-            <h2 className="text-primary text-2xl font-semibold">
-              Video Title Placeholder
+            <h2 className="text-museum-cream text-2xl font-semibold">
+              {t.video2.title}
             </h2>
           </div>
         </button>
 
         {/* Quiz */}
         <button
-          onClick={() => navigate("/quiz")}
-          className="w-80 rounded-2xl bg-museum-crimson group cursor-pointer hover:bg-museum-crimson/90 transition-all duration-300 flex flex-col items-center justify-center gap-6 p-10 border-2 border-museum-crimson hover:border-museum-cream/30"
+          onClick={openQuizIntro}
+          className="w-80 rounded-2xl bg-museum-crimson group cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-6 p-10"
         >
-          <div className="w-24 h-24 rounded-full border-2 border-museum-cream/40 flex items-center justify-center group-hover:border-museum-cream/80 transition-all duration-300">
+          <div className="w-24 h-24 rounded-full border-2 border-museum-cream/40 flex items-center justify-center group-hover:border-museum-cream transition-all duration-300">
             <svg
               className="w-10 h-10 text-museum-cream"
               fill="none"
@@ -111,33 +134,24 @@ function StartSide() {
               />
             </svg>
           </div>
-
           <div className="text-center">
-            <p className="tracking-widest uppercase text-xs text-primary/60 mb-2 font-light">
-              Interaktivt
+            <p className="tracking-widest uppercase text-xs text-museum-cream/60 mb-2 font-light">
+              {t.quiz.label}
             </p>
-            <h2 className="text-primary text-3xl font-semibold leading-tight">
-              Tag quizzen
+            <h2 className="text-museum-cream text-3xl font-semibold leading-tight">
+              {t.quiz.title}
             </h2>
-            <p className="text-primary/70 text-sm mt-3 leading-relaxed font-light">
-              Test din viden om udstillingen
+            <p className="text-museum-cream/70 text-sm mt-3 leading-relaxed font-light">
+              {t.quiz.body}
             </p>
           </div>
-
           <div className="mt-2 px-6 py-3 border border-museum-cream/30 rounded-full group-hover:bg-museum-cream/10 transition-all duration-300">
-            <span className="text-primary text-sm tracking-widest uppercase">
-              Start →
+            <span className="text-museum-cream text-sm tracking-widest uppercase">
+              {t.quiz.btn} →
             </span>
           </div>
         </button>
       </main>
-
-      {/* Footer hint */}
-      <footer className="px-20 pb-8 flex justify-center">
-        <p className="text-primary/40 text-sm tracking-widest uppercase font-light">
-          Tryk for at vælge
-        </p>
-      </footer>
     </div>
   );
 }
