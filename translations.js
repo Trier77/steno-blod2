@@ -9,7 +9,7 @@ const translations = {
       },
       video2: {
         label: "Film 2",
-        title: "Videotitel placeholder",
+        title: "Forsker-video",
       },
       quiz: {
         label: "Interaktivt",
