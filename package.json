@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:pi": "vite build --base=/",
+    "build:gh": "vite build --base=/steno-blod2", 
     "lint": "eslint .",
     "preview": "vite preview"
   },
