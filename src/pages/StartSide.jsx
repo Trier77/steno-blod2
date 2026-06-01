@@ -10,17 +10,24 @@ const BLOB_TOP_LEFT = `
 `;
 
 const BLOB_TOP_RIGHT = `
-  M26.5,-52C28.4,-39.9,20.1,-22.7,17,-12.7C14,-2.7,16.1,-0.1,24.4,9.7C32.7,19.6,47.2,36.5,48.2,50C49.3,63.5,36.9,73.5,22.9,77.4C8.8,81.3,-6.8,79,-17.4,70.7C-28,62.4,-33.6,48.2,-42.8,37.2C-52.1,26.3,-65.2,18.8,-71.2,7.4C-77.3,-4,-76.5,-19.3,-65.9,-24.9C-55.3,-30.5,-34.9,-26.5,-22.3,-33.8C-9.6,-41.1,-4.8,-59.7,3.7,-65.5C12.2,-71.2,24.5,-64.2,26.5,-52Z
+  M20.2,-27.1C33.6,-22.9,57,-29.8,58.3,-26.7C59.6,-23.6,38.7,-10.5,32.7,2C26.7,14.5,35.5,26.5,36.3,38.7C37,50.9,29.6,63.3,19.9,64.9C10.2,66.4,-1.9,57,-17.9,55C-34,53.1,-54,58.6,-63,52.3C-72.1,46,-70.1,27.9,-60.3,16.1C-50.4,4.3,-32.6,-1.2,-28.7,-14.5C-24.8,-27.7,-34.7,-48.6,-32.3,-57.9C-29.8,-67.2,-14.9,-64.8,-5.7,-55.8C3.4,-46.9,6.8,-31.4,20.2,-27.1Z
 `;
 
 const BLOB_BOTTOM_LEFT = `
   M32.7,-50.8C45.8,-42.5,62,-39.1,65.1,-30.3C68.2,-21.5,58.1,-7.3,51.7,4.4C45.2,16,42.3,25.1,36.8,32.6C31.4,40,23.3,45.8,14.3,48.2C5.4,50.7,-4.5,49.6,-13.5,46.7C-22.5,43.7,-30.7,38.7,-32.9,31.3C-35.2,23.8,-31.4,13.9,-34.9,3.7C-38.5,-6.5,-49.4,-17,-52.5,-29.6C-55.5,-42.2,-50.8,-57,-40.7,-66.6C-30.7,-76.2,-15.4,-80.7,-2.8,-76.4C9.8,-72.1,19.7,-59,32.7,-50.8Z
 `;
 
-function BlobButton({ path, label, onClick, transform }) {
+function BlobButton({
+  path,
+  label,
+  onClick,
+  svgTransform,
+  animationDelay = "0s",
+}) {
   const [pressed, setPressed] = useState(false);
   return (
     <g
+      transform={svgTransform}
       onClick={onClick}
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
@@ -29,13 +36,31 @@ function BlobButton({ path, label, onClick, transform }) {
       role="button"
       aria-label={label}
     >
+      {/* Mørkt lag bagved — outline-effekt */}
+      <path
+        d={path}
+        fill="#3d1118"
+        style={{
+          transformOrigin: "center",
+          transformBox: "fill-box",
+          transform: "scale(1.04)",
+          animation: pressed
+            ? "none"
+            : `blobPulseOuter 3s ease-in-out infinite ${animationDelay}`,
+        }}
+      />
+      {/* Selve blobben */}
       <path
         d={path}
         fill="#631d27"
-        transform={transform}
         style={{
+          transformOrigin: "center",
+          transformBox: "fill-box",
           transition: "filter 0.2s ease",
           filter: pressed ? "brightness(0.75)" : "brightness(1)",
+          animation: pressed
+            ? "none"
+            : `blobPulse 3s ease-in-out infinite ${animationDelay}`,
         }}
       />
     </g>
@@ -70,6 +95,17 @@ function StartSide() {
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
+      <style>{`
+  @keyframes blobPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  @keyframes blobPulseOuter {
+    0%, 100% { transform: scale(1.04); }
+    50% { transform: scale(1.06); }
+  }
+`}</style>
+
       {showQuizIntro && (
         <ConfirmDialog
           visible={dialogVisible}
@@ -86,26 +122,68 @@ function StartSide() {
         viewBox="0 0 1920 1080"
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full"
-        style={{ display: "block" }}
+        style={{ display: "block", position: "relative", zIndex: 1 }}
       >
+        <rect x="0" y="0" width="1920" height="1080" fill="url(#bgGradient)" />
         <BlobButton
           path={BLOB_TOP_LEFT}
-          label={t.btn1?.label ?? "Cyklusserne"}
+          label="Cyklus"
           onClick={() => navigate("/cyklusser")}
-          transform="translate(240 0) scale(8) rotate(375)"
+          svgTransform="translate(240 0) scale(8) rotate(375)"
+          animationDelay="0s"
         />
         <BlobButton
           path={BLOB_TOP_RIGHT}
-          label={t.btn2?.label ?? "Forskerens ord"}
+          label="Forsker video"
           onClick={() => navigate("/video/forsker")}
-          transform="translate(1600 0) scale(8) rotate(300)"
+          svgTransform="translate(1770 130) scale(8) rotate(10)"
+          animationDelay="1s"
         />
         <BlobButton
           path={BLOB_BOTTOM_LEFT}
-          label={t.btn3?.label ?? "Test din viden"}
+          label="QUIZ"
           onClick={openQuizIntro}
-          transform="translate(280 1000) scale(7) rotate(120)"
+          svgTransform="translate(600 1150) scale(8) rotate(110)"
+          animationDelay="2s"
         />
+
+        {/* Labels — absolutte positioner, aldrig roterede */}
+        <text
+          x="300"
+          y="200"
+          textAnchor="middle"
+          fill="#f2f1da"
+          fontSize="52"
+          fontWeight="600"
+          fontFamily="Flama, sans-serif"
+          style={{ pointerEvents: "none" }}
+        >
+          Cyklus
+        </text>
+        <text
+          x="1650"
+          y="300"
+          textAnchor="middle"
+          fill="#f2f1da"
+          fontSize="52"
+          fontWeight="600"
+          fontFamily="Flama, sans-serif"
+          style={{ pointerEvents: "none" }}
+        >
+          Forsker video
+        </text>
+        <text
+          x="690"
+          y="1000"
+          textAnchor="middle"
+          fill="#f2f1da"
+          fontSize="52"
+          fontWeight="600"
+          fontFamily="Flama, sans-serif"
+          style={{ pointerEvents: "none" }}
+        >
+          QUIZ
+        </text>
 
         {/* Language button — bottom right, no blob */}
         <foreignObject x="1760" y="990" width="150" height="85">
