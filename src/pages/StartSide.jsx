@@ -5,6 +5,78 @@ import translations from "../../translations";
 import FlagButton from "../components/FlagButton";
 import ConfirmDialog from "../components/ConfirmDialogue";
 
+// Organic wavy blobs anchored to each corner, no overlap, clear gaps between them.
+// SVG space: 1920 × 1080. Each blob bleeds off its corner edge.
+
+const BLOB_TOP_LEFT = `
+  M 0,0
+  C 70,-70 240,-60 300,-40
+  C 360,-20 380,40 420,65
+  C 465,95 530,90 570,125
+  C 610,160 600,215 560,240
+  C 520,265 460,250 420,275
+  C 370,305 360,345 300,360
+  C 240,375 160,345 0,310
+  L 0,0
+  Z
+`;
+
+const BLOB_TOP_RIGHT = `
+  M 1920,0
+  C 1850,-70 1680,-60 1620,-40
+  C 1560,-20 1540,40 1500,65
+  C 1455,95 1390,90 1350,125
+  C 1310,160 1320,215 1360,240
+  C 1400,265 1460,250 1500,275
+  C 1550,305 1560,345 1620,360
+  C 1680,375 1760,345 1920,310
+  L 1920,0
+  Z
+`;
+
+const BLOB_BOTTOM_LEFT = `
+  M 0,1080
+  C 70,1150 240,1140 300,1120
+  C 360,1100 380,1040 420,1015
+  C 465,985 530,990 570,955
+  C 610,920 600,865 560,840
+  C 520,815 460,830 420,805
+  C 370,775 360,735 300,720
+  C 240,705 160,735 0,770
+  L 0,1080
+  Z
+`;
+
+const LABEL = {
+  topLeft: { x: 280, y: 380 },
+  topRight: { x: 1640, y: 380 },
+  bottomLeft: { x: 290, y: 720 },
+};
+
+function BlobButton({ path, labelX, labelY, label, sublabel, onClick }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <g
+      onClick={onClick}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      style={{ cursor: "pointer" }}
+      role="button"
+      aria-label={label}
+    >
+      <path
+        d={path}
+        fill="#631d27"
+        style={{
+          transition: "filter 0.2s ease",
+          filter: pressed ? "brightness(0.75)" : "brightness(1)",
+        }}
+      />
+    </g>
+  );
+}
+
 function StartSide() {
   const navigate = useNavigate();
   const { language, visible } = useLanguage();
@@ -18,12 +90,10 @@ function StartSide() {
     setShowQuizIntro(true);
     setTimeout(() => setDialogVisible(true), 10);
   };
-
   const closeQuizIntro = () => {
     setDialogVisible(false);
     setTimeout(() => setShowQuizIntro(false), 300);
   };
-
   const handleStartQuiz = () => {
     setDialogVisible(false);
     setTimeout(() => navigate("/quiz"), 300);
@@ -31,7 +101,9 @@ function StartSide() {
 
   return (
     <div
-      className={`w-screen h-screen bg-museum-cream flex flex-col overflow-hidden select-none font-flama transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+      className={`w-screen h-screen bg-museum-cream overflow-hidden select-none font-flama transition-opacity duration-300 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
     >
       {showQuizIntro && (
         <ConfirmDialog
@@ -45,113 +117,52 @@ function StartSide() {
         />
       )}
 
-      {/* Header */}
-      <header className="flex items-center justify-between px-20 pt-14 pb-10">
-        <div>
-          <p className="text-primary tracking-[0.3em] uppercase text-sm font-light">
-            {t.museumName}
-          </p>
-          <h1 className="text-primary text-5xl font-semibold leading-tight mt-1">
-            {t.exhibitionTitle}
-          </h1>
-        </div>
-        <FlagButton />
-      </header>
-
-      {/* Main content */}
-      <main className="flex flex-1 gap-10 px-20 pb-12">
-        {/* Video 1 */}
-        <button
-          onClick={() => navigate("/video/1")}
-          className="flex-1 relative rounded-2xl overflow-hidden bg-museum-blue group cursor-pointer border-2 border-transparent hover:border-museum-crimson transition-all duration-300"
-        >
-          {/* <img src="/thumbnails/video1.jpg" className="absolute inset-0 w-full h-full object-cover" /> */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-24 h-24 rounded-full bg-museum-cream/20 border-2 border-museum-cream/60 flex items-center justify-center group-hover:scale-110 group-hover:bg-museum-cream/30 transition-all duration-300">
-              <svg
-                className="w-10 h-10 text-museum-cream ml-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 px-6 py-5">
-            <p className="tracking-widest uppercase text-xs text-museum-cream/70 mb-1 font-light">
-              {t.video1.label}
-            </p>
-            <h2 className="text-museum-cream text-2xl font-semibold">
-              {t.video1.title}
-            </h2>
-          </div>
-        </button>
-
-        {/* Video 2 */}
-        <button
-          onClick={() => navigate("/video/2")}
-          className="flex-1 relative rounded-2xl overflow-hidden bg-museum-blue group cursor-pointer border-2 border-transparent hover:border-museum-crimson transition-all duration-300"
-        >
-          {/* <img src="/thumbnails/video2.jpg" className="absolute inset-0 w-full h-full object-cover" /> */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-24 h-24 rounded-full bg-museum-cream/20 border-2 border-museum-cream/60 flex items-center justify-center group-hover:scale-110 group-hover:bg-museum-cream/30 transition-all duration-300">
-              <svg
-                className="w-10 h-10 text-museum-cream ml-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 px-6 py-5">
-            <p className="tracking-widest uppercase text-xs text-museum-cream/70 mb-1 font-light">
-              {t.video2.label}
-            </p>
-            <h2 className="text-museum-cream text-2xl font-semibold">
-              {t.video2.title}
-            </h2>
-          </div>
-        </button>
-
-        {/* Quiz */}
-        <button
+      <svg
+        viewBox="0 0 1920 1080"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full"
+        style={{ display: "block" }}
+      >
+        <BlobButton
+          path={BLOB_TOP_LEFT}
+          labelX={LABEL.topLeft.x}
+          labelY={LABEL.topLeft.y}
+          label={t.btn1?.label ?? "Cyklusserne"}
+          onClick={() => navigate("/cyklusser")}
+        />
+        <BlobButton
+          path={BLOB_TOP_RIGHT}
+          labelX={LABEL.topRight.x}
+          labelY={LABEL.topRight.y}
+          label={t.btn2?.label ?? "Forskerens ord"}
+          onClick={() => navigate("/video/forsker")}
+        />
+        <BlobButton
+          path={BLOB_BOTTOM_LEFT}
+          labelX={LABEL.bottomLeft.x}
+          labelY={LABEL.bottomLeft.y}
+          label={t.btn3?.label ?? "Test din viden"}
           onClick={openQuizIntro}
-          className="w-80 rounded-2xl bg-museum-crimson group cursor-pointer transition-all duration-300 flex flex-col items-center justify-center gap-6 p-10"
-        >
-          <div className="w-24 h-24 rounded-full border-2 border-museum-cream/40 flex items-center justify-center group-hover:border-museum-cream transition-all duration-300">
-            <svg
-              className="w-10 h-10 text-museum-cream"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
-              />
-            </svg>
+        />
+
+        {/* Language button — bottom right */}
+        <foreignObject x="1760" y="990" width="150" height="85">
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "flex-end",
+              width: "100%",
+              height: "100%",
+              paddingRight: "12px",
+              paddingBottom: "8px",
+            }}
+          >
+            <FlagButton />
           </div>
-          <div className="text-center">
-            <p className="tracking-widest uppercase text-xs text-museum-cream/60 mb-2 font-light">
-              {t.quiz.label}
-            </p>
-            <h2 className="text-museum-cream text-3xl font-semibold leading-tight">
-              {t.quiz.title}
-            </h2>
-            <p className="text-museum-cream/70 text-sm mt-3 leading-relaxed font-light">
-              {t.quiz.body}
-            </p>
-          </div>
-          <div className="mt-2 px-6 py-3 border border-museum-cream/30 rounded-full group-hover:bg-museum-cream/10 transition-all duration-300">
-            <span className="text-museum-cream text-sm tracking-widest uppercase">
-              {t.quiz.btn} →
-            </span>
-          </div>
-        </button>
-      </main>
+        </foreignObject>
+      </svg>
     </div>
   );
 }
