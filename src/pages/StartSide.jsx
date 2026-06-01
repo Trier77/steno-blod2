@@ -5,55 +5,19 @@ import translations from "../../translations";
 import FlagButton from "../components/FlagButton";
 import ConfirmDialog from "../components/ConfirmDialogue";
 
-// Organic wavy blobs anchored to each corner, no overlap, clear gaps between them.
-// SVG space: 1920 × 1080. Each blob bleeds off its corner edge.
-
 const BLOB_TOP_LEFT = `
-  M 0,0
-  C 70,-70 240,-60 300,-40
-  C 360,-20 380,40 420,65
-  C 465,95 530,90 570,125
-  C 610,160 600,215 560,240
-  C 520,265 460,250 420,275
-  C 370,305 360,345 300,360
-  C 240,375 160,345 0,310
-  L 0,0
-  Z
+  M40.6,-59.2C48.1,-58.4,46.5,-39.5,52.3,-24.6C58,-9.6,71.1,1.2,75.2,14.7C79.4,28.2,74.6,44.3,62.2,48.1C49.9,51.9,30,43.2,14.1,47.7C-1.8,52.2,-13.7,69.7,-23.1,70.7C-32.5,71.6,-39.5,55.9,-39.8,42C-40.1,28.1,-33.8,16,-32.6,6.4C-31.4,-3.3,-35.3,-10.6,-37.8,-22.3C-40.3,-34,-41.5,-50.2,-34.9,-51.4C-28.4,-52.7,-14.2,-39,1.2,-40.8C16.6,-42.6,33.2,-60,40.6,-59.2Z
 `;
 
 const BLOB_TOP_RIGHT = `
-  M 1920,0
-  C 1850,-70 1680,-60 1620,-40
-  C 1560,-20 1540,40 1500,65
-  C 1455,95 1390,90 1350,125
-  C 1310,160 1320,215 1360,240
-  C 1400,265 1460,250 1500,275
-  C 1550,305 1560,345 1620,360
-  C 1680,375 1760,345 1920,310
-  L 1920,0
-  Z
+  M26.5,-52C28.4,-39.9,20.1,-22.7,17,-12.7C14,-2.7,16.1,-0.1,24.4,9.7C32.7,19.6,47.2,36.5,48.2,50C49.3,63.5,36.9,73.5,22.9,77.4C8.8,81.3,-6.8,79,-17.4,70.7C-28,62.4,-33.6,48.2,-42.8,37.2C-52.1,26.3,-65.2,18.8,-71.2,7.4C-77.3,-4,-76.5,-19.3,-65.9,-24.9C-55.3,-30.5,-34.9,-26.5,-22.3,-33.8C-9.6,-41.1,-4.8,-59.7,3.7,-65.5C12.2,-71.2,24.5,-64.2,26.5,-52Z
 `;
 
 const BLOB_BOTTOM_LEFT = `
-  M 0,1080
-  C 70,1150 240,1140 300,1120
-  C 360,1100 380,1040 420,1015
-  C 465,985 530,990 570,955
-  C 610,920 600,865 560,840
-  C 520,815 460,830 420,805
-  C 370,775 360,735 300,720
-  C 240,705 160,735 0,770
-  L 0,1080
-  Z
+  M32.7,-50.8C45.8,-42.5,62,-39.1,65.1,-30.3C68.2,-21.5,58.1,-7.3,51.7,4.4C45.2,16,42.3,25.1,36.8,32.6C31.4,40,23.3,45.8,14.3,48.2C5.4,50.7,-4.5,49.6,-13.5,46.7C-22.5,43.7,-30.7,38.7,-32.9,31.3C-35.2,23.8,-31.4,13.9,-34.9,3.7C-38.5,-6.5,-49.4,-17,-52.5,-29.6C-55.5,-42.2,-50.8,-57,-40.7,-66.6C-30.7,-76.2,-15.4,-80.7,-2.8,-76.4C9.8,-72.1,19.7,-59,32.7,-50.8Z
 `;
 
-const LABEL = {
-  topLeft: { x: 280, y: 380 },
-  topRight: { x: 1640, y: 380 },
-  bottomLeft: { x: 290, y: 720 },
-};
-
-function BlobButton({ path, labelX, labelY, label, sublabel, onClick }) {
+function BlobButton({ path, label, onClick, transform }) {
   const [pressed, setPressed] = useState(false);
   return (
     <g
@@ -68,6 +32,7 @@ function BlobButton({ path, labelX, labelY, label, sublabel, onClick }) {
       <path
         d={path}
         fill="#631d27"
+        transform={transform}
         style={{
           transition: "filter 0.2s ease",
           filter: pressed ? "brightness(0.75)" : "brightness(1)",
@@ -125,27 +90,24 @@ function StartSide() {
       >
         <BlobButton
           path={BLOB_TOP_LEFT}
-          labelX={LABEL.topLeft.x}
-          labelY={LABEL.topLeft.y}
           label={t.btn1?.label ?? "Cyklusserne"}
           onClick={() => navigate("/cyklusser")}
+          transform="translate(240 0) scale(8) rotate(375)"
         />
         <BlobButton
           path={BLOB_TOP_RIGHT}
-          labelX={LABEL.topRight.x}
-          labelY={LABEL.topRight.y}
           label={t.btn2?.label ?? "Forskerens ord"}
           onClick={() => navigate("/video/forsker")}
+          transform="translate(1600 0) scale(8) rotate(300)"
         />
         <BlobButton
           path={BLOB_BOTTOM_LEFT}
-          labelX={LABEL.bottomLeft.x}
-          labelY={LABEL.bottomLeft.y}
           label={t.btn3?.label ?? "Test din viden"}
           onClick={openQuizIntro}
+          transform="translate(280 1000) scale(7) rotate(120)"
         />
 
-        {/* Language button — bottom right */}
+        {/* Language button — bottom right, no blob */}
         <foreignObject x="1760" y="990" width="150" height="85">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
