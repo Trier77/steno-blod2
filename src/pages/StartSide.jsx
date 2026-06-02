@@ -36,20 +36,17 @@ function BlobButton({
       role="button"
       aria-label={label}
     >
-      {/* Mørkt lag bagved — outline-effekt */}
       <path
         d={path}
         fill="#3d1118"
         style={{
           transformOrigin: "center",
           transformBox: "fill-box",
-          transform: "scale(1.04)",
           animation: pressed
             ? "none"
             : `blobPulseOuter 3s ease-in-out infinite ${animationDelay}`,
         }}
       />
-      {/* Selve blobben */}
       <path
         d={path}
         fill="#631d27"
@@ -64,6 +61,37 @@ function BlobButton({
         }}
       />
     </g>
+  );
+}
+
+function WaveText({ label, x, y, animationDelay = 0 }) {
+  const CHAR_WIDTH = 60;
+  const chars = label.split("");
+  const totalWidth = chars.length * CHAR_WIDTH;
+  const startX = x - totalWidth / 2;
+
+  return (
+    <>
+      {chars.map((char, i) => (
+        <text
+          key={i}
+          x={startX + i * CHAR_WIDTH + CHAR_WIDTH / 2}
+          y={y}
+          textAnchor="middle"
+          fill="#f2f1da"
+          fontSize="82"
+          fontWeight="600"
+          fontFamily="Flama, sans-serif"
+          style={{
+            pointerEvents: "none",
+            animation: `letterWave 2s ease-in-out infinite`,
+            animationDelay: `${animationDelay + i * 0.08}s`,
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </text>
+      ))}
+    </>
   );
 }
 
@@ -94,17 +122,22 @@ function StartSide() {
       className={`w-screen h-screen bg-museum-cream overflow-hidden select-none font-flama transition-opacity duration-300 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
+      style={{ position: "relative" }}
     >
       <style>{`
-  @keyframes blobPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-  }
-  @keyframes blobPulseOuter {
-    0%, 100% { transform: scale(1.04); }
-    50% { transform: scale(1.06); }
-  }
-`}</style>
+        @keyframes blobPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.02); }
+        }
+        @keyframes blobPulseOuter {
+          0%, 100% { transform: scale(1.04); }
+          50% { transform: scale(1.06); }
+        }
+        @keyframes letterWave {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+      `}</style>
 
       {showQuizIntro && (
         <ConfirmDialog
@@ -124,19 +157,18 @@ function StartSide() {
         className="w-full h-full"
         style={{ display: "block", position: "relative", zIndex: 1 }}
       >
-        <rect x="0" y="0" width="1920" height="1080" fill="url(#bgGradient)" />
         <BlobButton
           path={BLOB_TOP_LEFT}
           label="Cyklus"
           onClick={() => navigate("/cyklusser")}
-          svgTransform="translate(240 0) scale(8) rotate(375)"
+          svgTransform="translate(240 0) scale(9) rotate(375)"
           animationDelay="0s"
         />
         <BlobButton
           path={BLOB_TOP_RIGHT}
-          label="Forsker video"
+          label="Video"
           onClick={() => navigate("/video/forsker")}
-          svgTransform="translate(1770 130) scale(8) rotate(10)"
+          svgTransform="translate(1770 130) scale(9) rotate(10)"
           animationDelay="1s"
         />
         <BlobButton
@@ -147,45 +179,11 @@ function StartSide() {
           animationDelay="2s"
         />
 
-        {/* Labels — absolutte positioner, aldrig roterede */}
-        <text
-          x="300"
-          y="200"
-          textAnchor="middle"
-          fill="#f2f1da"
-          fontSize="52"
-          fontWeight="600"
-          fontFamily="Flama, sans-serif"
-          style={{ pointerEvents: "none" }}
-        >
-          Cyklus
-        </text>
-        <text
-          x="1650"
-          y="300"
-          textAnchor="middle"
-          fill="#f2f1da"
-          fontSize="52"
-          fontWeight="600"
-          fontFamily="Flama, sans-serif"
-          style={{ pointerEvents: "none" }}
-        >
-          Forsker video
-        </text>
-        <text
-          x="690"
-          y="1000"
-          textAnchor="middle"
-          fill="#f2f1da"
-          fontSize="52"
-          fontWeight="600"
-          fontFamily="Flama, sans-serif"
-          style={{ pointerEvents: "none" }}
-        >
-          QUIZ
-        </text>
+        <WaveText label="Cyklus" x={400} y={250} animationDelay={0} />
+        <WaveText label="Video" x={1600} y={350} animationDelay={1} />
+        <WaveText label="QUIZ" x={720} y={1010} animationDelay={2} />
 
-        {/* Language button — bottom right, no blob */}
+        {/* Language button — bottom right */}
         <foreignObject x="1760" y="990" width="150" height="85">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
