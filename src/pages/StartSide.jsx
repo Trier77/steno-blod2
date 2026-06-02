@@ -135,7 +135,7 @@ function StartSide() {
           labelX={LABEL.topRight.x}
           labelY={LABEL.topRight.y}
           label={t.btn2?.label ?? "Forskerens ord"}
-          onClick={() => navigate("/video/forsker")}
+          onClick={() => navigate("/video/0")}
         />
         <BlobButton
           path={BLOB_BOTTOM_LEFT}
