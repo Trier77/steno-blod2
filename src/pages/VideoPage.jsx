@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import BackButton from "../components/BackButton";
+import mettestest from "../assets/mettestest.mp4";
 
 // Swap these out when the museum provides the actual video files
-const VIDEO_SOURCES = {
-  1: null, // e.g. import video1 from "../assets/video1.mp4"
-  2: null, // e.g. import video2 from "../assets/video2.mp4"
-};
+const VIDEO_SOURCES = [
+  mettestest, // e.g. import video1 from "../assets/video1.mp4"
+mettestest, // e.g. import video2 from "../assets/video2.mp4"
+];
 
 function VideoPage() {
   const { id } = useParams();
-  const videoSrc = VIDEO_SOURCES[id];
+  const videoSrc = VIDEO_SOURCES[parseInt(id)];
 
   const videoRef = useRef(null);
   const progressRef = useRef(null);

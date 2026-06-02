@@ -167,7 +167,7 @@ function StartSide() {
         <BlobButton
           path={BLOB_TOP_RIGHT}
           label="Video"
-          onClick={() => navigate("/video/forsker")}
+          onClick={() => navigate("/video/0")}
           svgTransform="translate(1770 130) scale(9) rotate(10)"
           animationDelay="1s"
         />
