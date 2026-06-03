@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useLanguage } from "../context/LanguageContext";
+import { useBlob } from "../context/BlobContext";
 import translations from "../../translations";
 import FlagButton from "../components/FlagButton";
 import ConfirmDialog from "../components/ConfirmDialogue";
@@ -23,6 +24,7 @@ function BlobButton({
   onClick,
   svgTransform,
   animationDelay = "0s",
+  visible = true,
 }) {
   const [pressed, setPressed] = useState(false);
   return (
@@ -32,7 +34,12 @@ function BlobButton({
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
-      style={{ cursor: "pointer" }}
+      style={{
+        cursor: "pointer",
+        transition: "opacity 0.8s ease",
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+      }}
       role="button"
       aria-label={label}
     >
@@ -64,7 +71,7 @@ function BlobButton({
   );
 }
 
-function WaveText({ label, x, y, animationDelay = 0 }) {
+function WaveText({ label, x, y, animationDelay = 0, fade = false }) {
   const CHAR_WIDTH = 60;
   const chars = label.split("");
   const totalWidth = chars.length * CHAR_WIDTH;
@@ -84,8 +91,10 @@ function WaveText({ label, x, y, animationDelay = 0 }) {
           fontFamily="Flama, sans-serif"
           style={{
             pointerEvents: "none",
-            animation: `letterWave 2s ease-in-out infinite`,
-            animationDelay: `${animationDelay + i * 0.08}s`,
+            animation: `letterWave 3s ease-in-out infinite`,
+            animationDelay: `${animationDelay + i * 0.16}s`,
+            transition: "opacity 0.8s ease",
+            opacity: fade ? 0 : 1,
           }}
         >
           {char === " " ? "\u00A0" : char}
@@ -95,14 +104,88 @@ function WaveText({ label, x, y, animationDelay = 0 }) {
   );
 }
 
+function QuizBlobHitArea({ onClick, expanding }) {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        pointerEvents: expanding ? "none" : "auto",
+        zIndex: 3,
+        overflow: "hidden",
+      }}
+    >
+      <svg
+        viewBox="0 0 1920 1080"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+          overflow: "visible",
+        }}
+      >
+        <g
+          transform="translate(600 1150) scale(8) rotate(110)"
+          onClick={onClick}
+          onPointerDown={() => setPressed(true)}
+          onPointerUp={() => setPressed(false)}
+          onPointerLeave={() => setPressed(false)}
+          style={{ cursor: "pointer" }}
+          role="button"
+          aria-label="QUIZ"
+        >
+          <path
+            d={BLOB_BOTTOM_LEFT}
+            fill="transparent"
+            style={{ transformOrigin: "center", transformBox: "fill-box" }}
+          />
+        </g>
+        <WaveText
+          label="QUIZ"
+          x={720}
+          y={1010}
+          animationDelay={2}
+          fade={expanding}
+        />
+      </svg>
+    </div>
+  );
+}
+
 function StartSide() {
   const navigate = useNavigate();
   const { language, visible } = useLanguage();
+  // Read expanded directly — if blob is still expanded when we mount,
+  // others start hidden and we schedule them to fade in shortly after
+  const { setExpanded, expanded } = useBlob();
   const t = translations[language].startside;
   const tQuiz = translations[language].quiz;
 
   const [showQuizIntro, setShowQuizIntro] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [expanding, setExpanding] = useState(false);
+
+  // If expanded is true when we mount, blob is currently shrinking —
+  // start others as hidden and fade them in after 400ms
+  const [othersVisible, setOthersVisible] = useState(!expanded);
+
+  useEffect(() => {
+    if (expanded) {
+      // We just mounted while blob is shrinking — fade others in at 400ms
+      const id = setTimeout(() => setOthersVisible(true), 400);
+      return () => clearTimeout(id);
+    }
+  }, []); // intentionally only on mount
+
+  const handleQuizTap = () => {
+    setOthersVisible(false);
+    setExpanding(true);
+    setExpanded(true);
+    setTimeout(() => navigate("/quiz"), 1600);
+  };
 
   const openQuizIntro = () => {
     setShowQuizIntro(true);
@@ -163,6 +246,7 @@ function StartSide() {
           onClick={() => navigate("/cyklusser")}
           svgTransform="translate(240 0) scale(9) rotate(375)"
           animationDelay="0s"
+          visible={othersVisible}
         />
         <BlobButton
           path={BLOB_TOP_RIGHT}
@@ -170,20 +254,24 @@ function StartSide() {
           onClick={() => navigate("/video/forsker")}
           svgTransform="translate(1770 130) scale(9) rotate(10)"
           animationDelay="1s"
-        />
-        <BlobButton
-          path={BLOB_BOTTOM_LEFT}
-          label="QUIZ"
-          onClick={openQuizIntro}
-          svgTransform="translate(600 1150) scale(8) rotate(110)"
-          animationDelay="2s"
+          visible={othersVisible}
         />
 
-        <WaveText label="Cyklus" x={400} y={250} animationDelay={0} />
-        <WaveText label="Video" x={1600} y={350} animationDelay={1} />
-        <WaveText label="QUIZ" x={720} y={1010} animationDelay={2} />
+        <WaveText
+          label="Cyklus"
+          x={400}
+          y={250}
+          animationDelay={0}
+          fade={!othersVisible}
+        />
+        <WaveText
+          label="Video"
+          x={1600}
+          y={350}
+          animationDelay={1}
+          fade={!othersVisible}
+        />
 
-        {/* Language button — bottom right */}
         <foreignObject x="1760" y="990" width="150" height="85">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
@@ -201,6 +289,8 @@ function StartSide() {
           </div>
         </foreignObject>
       </svg>
+
+      <QuizBlobHitArea onClick={handleQuizTap} expanding={expanding} />
     </div>
   );
 }

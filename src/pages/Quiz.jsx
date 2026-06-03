@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useLanguage } from "../context/LanguageContext";
+import { useBlob } from "../context/BlobContext.jsx";
 import translations from "../../translations";
 import BackButton from "../components/BackButton";
+import { motion } from "framer-motion";
 
 const STORAGE_KEY = "museum_quiz_scores";
 const ATTEMPTS_KEY = "museum_quiz_attempts";
@@ -81,11 +83,6 @@ if (typeof document !== "undefined" && !document.getElementById("quiz-style")) {
   const s = document.createElement("style");
   s.id = "quiz-style";
   s.textContent = `
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-slide-up { animation: fadeSlideUp 0.6s ease forwards; }
     @keyframes heartbeat {
       0%   { transform: scale(1); }
       14%  { transform: scale(1.06); }
@@ -99,6 +96,15 @@ if (typeof document !== "undefined" && !document.getElementById("quiz-style")) {
   document.head.appendChild(s);
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 22 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.4, 0, 0.2, 1], delay },
+  }),
+};
+
 const SCREEN_QUESTION = "question";
 const SCREEN_EXPLANATION = "explanation";
 const SCREEN_RESULTS = "results";
@@ -106,6 +112,7 @@ const SCREEN_RESULTS = "results";
 function Quiz() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { setExpanded } = useBlob();
   const t = translations[language].quiz;
 
   const [screen, setScreen] = useState(SCREEN_QUESTION);
@@ -118,10 +125,17 @@ function Quiz() {
   const [stats, setStats] = useState(null);
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [quitVisible, setQuitVisible] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
 
   const question = t.questions[currentQ];
   const isActiveQuiz =
     screen === SCREEN_QUESTION || screen === SCREEN_EXPLANATION;
+
+  // Fade content in after blob has had time to expand
+  useEffect(() => {
+    const id = setTimeout(() => setContentVisible(true), 400);
+    return () => clearTimeout(id);
+  }, []);
 
   const transitionTo = (nextScreen) => {
     setFadeIn(false);
@@ -129,6 +143,13 @@ function Quiz() {
       setScreen(nextScreen);
       setFadeIn(true);
     }, 300);
+  };
+
+  const navigateHome = () => {
+    // Fade content out, shrink blob, then navigate
+    setContentVisible(false);
+    setExpanded(false);
+    setTimeout(() => navigate("/"), 1600);
   };
 
   const handleAnswer = (index) => {
@@ -173,7 +194,7 @@ function Quiz() {
       setShowQuitDialog(true);
       setTimeout(() => setQuitVisible(true), 10);
     } else {
-      navigate("/");
+      navigateHome();
     }
   };
 
@@ -181,7 +202,7 @@ function Quiz() {
     setQuitVisible(false);
     setTimeout(() => {
       setShowQuitDialog(false);
-      navigate("/");
+      navigateHome();
     }, 300);
   };
 
@@ -192,28 +213,36 @@ function Quiz() {
 
   const getOptionStyle = (index) => {
     if (selectedAnswer === null) {
-      return "bg-museum-blue text-primary hover:bg-museum-blue/80";
+      return "bg-museum-cream text-primary hover:opacity-90";
     }
     if (!showCorrect) {
       if (index === selectedAnswer) return "bg-primary text-museum-cream";
-      return "bg-museum-blue text-primary opacity-50";
+      return "bg-museum-cream text-primary opacity-40";
     }
     if (index === question.correct) return "bg-green-600 text-white";
     if (index === selectedAnswer && !wasCorrect)
-      return "bg-museum-crimson text-museum-cream";
-    return "bg-museum-blue text-primary opacity-50";
+      return "bg-primary text-museum-cream opacity-80";
+    return "bg-museum-cream text-primary opacity-30";
   };
 
   return (
-    <div className="w-screen h-screen bg-museum-cream flex flex-col overflow-hidden select-none font-flama">
+    // Transparent background — the persistent blob from App.jsx is the background
+    <div
+      className="w-screen h-screen flex flex-col overflow-hidden select-none font-flama"
+      style={{
+        backgroundColor: "transparent",
+        position: "relative",
+        zIndex: 6,
+      }}
+    >
       <BackButton onClick={handleBackAttempt} />
 
       {/* Quit dialog */}
       {showQuitDialog && (
         <div
-          className="absolute inset-0 z-40 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center"
           style={{
-            backgroundColor: `rgba(0,0,0,${quitVisible ? 0.4 : 0})`,
+            backgroundColor: `rgba(0,0,0,${quitVisible ? 0.5 : 0})`,
             transition: "background-color 0.3s ease",
           }}
         >
@@ -234,13 +263,14 @@ function Quiz() {
             <div className="flex flex-col gap-4 w-full">
               <button
                 onClick={handleConfirmQuit}
-                className="w-full bg-museum-crimson text-museum-cream font-semibold text-2xl rounded-full py-5"
+                className="w-full bg-primary text-museum-cream font-semibold text-2xl rounded-full py-5"
               >
                 {t.quitConfirm}
               </button>
               <button
                 onClick={handleCancelQuit}
-                className="w-full bg-museum-blue text-primary font-semibold text-2xl rounded-full py-5"
+                className="w-full text-museum-cream font-semibold text-2xl rounded-full py-5"
+                style={{ backgroundColor: "#631d27" }}
               >
                 {t.quitCancel}
               </button>
@@ -253,47 +283,61 @@ function Quiz() {
       <div
         className="flex flex-col flex-1 px-32 py-16"
         style={{
-          opacity: fadeIn ? 1 : 0,
-          transform: fadeIn ? "translateY(0)" : "translateY(16px)",
-          transition: "opacity 0.3s ease, transform 0.3s ease",
+          opacity: contentVisible && fadeIn ? 1 : 0,
+          transform:
+            contentVisible && fadeIn ? "translateY(0)" : "translateY(16px)",
+          transition: "opacity 0.4s ease, transform 0.4s ease",
         }}
       >
         {/* QUESTION */}
         {screen === SCREEN_QUESTION && (
           <div className="flex flex-col h-full">
-            {/* Question */}
             <div className="flex-1 flex items-center justify-center px-16">
-              <h2 className="text-primary text-4xl font-semibold text-center leading-snug">
+              <motion.h2
+                className="text-museum-cream text-4xl font-semibold text-center leading-snug"
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={0.1}
+              >
                 {question.question}
-              </h2>
+              </motion.h2>
             </div>
 
-            {/* 2x2 options grid */}
             <div className="grid grid-cols-2 gap-5 mb-8">
               {question.options.map((option, i) => (
-                <button
+                <motion.button
                   key={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  custom={0.2 + i * 0.1}
                   onClick={() => handleAnswer(i)}
                   className={`rounded-2xl px-8 py-8 font-semibold text-2xl text-center transition-all duration-500 ${getOptionStyle(i)}`}
                 >
                   {option}
-                </button>
+                </motion.button>
               ))}
             </div>
 
-            {/* Progress dots */}
-            <div className="flex items-center justify-center gap-3 mb-4">
+            <motion.div
+              className="flex items-center justify-center gap-3 mb-4"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={0.6}
+            >
               {t.questions.map((_, i) => (
                 <div
                   key={i}
-                  className={`rounded-full bg-primary transition-all duration-300 ${
+                  className={`rounded-full bg-museum-cream transition-all duration-300 ${
                     i === currentQ
                       ? "w-5 h-5 opacity-100"
                       : "w-3 h-3 opacity-30"
                   }`}
                 />
               ))}
-            </div>
+            </motion.div>
           </div>
         )}
 
@@ -301,16 +345,16 @@ function Quiz() {
         {screen === SCREEN_EXPLANATION && (
           <div className="flex flex-col items-center justify-between h-full">
             <div className="flex-1 flex flex-col items-center justify-center gap-10 px-16">
-              <span className="text-primary text-6xl font-semibold">
+              <span className="text-museum-cream text-6xl font-semibold">
                 {wasCorrect ? t.correctLabel : t.wrongLabel}
               </span>
-              <p className="text-primary/80 text-3xl text-center leading-relaxed font-light">
+              <p className="text-museum-cream/80 text-3xl text-center leading-relaxed font-light">
                 {question.explanation}
               </p>
             </div>
             <button
               onClick={handleNext}
-              className="bg-museum-crimson text-museum-cream font-semibold text-2xl rounded-full px-16 py-5 mb-4 hover:opacity-90 transition-opacity duration-200"
+              className="bg-museum-cream text-primary font-semibold text-2xl rounded-full px-16 py-5 mb-4 hover:opacity-90 transition-opacity duration-200"
             >
               {currentQ + 1 >= t.questions.length ? t.resultsTitle : t.nextBtn}
             </button>
@@ -325,7 +369,7 @@ function Quiz() {
             stats={stats}
             t={t}
             onPlayAgain={handlePlayAgain}
-            onHome={() => navigate("/")}
+            onHome={navigateHome}
           />
         )}
       </div>
@@ -350,16 +394,24 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
 
   return (
     <div className="flex flex-col items-center justify-between h-full px-16 pt-12 pb-10">
-      {/* Two cards side by side */}
       <div className="flex gap-10 w-full flex-1 mb-10">
-        {/* Score card */}
-        <div className="flex-1 bg-museum-blue/40 rounded-3xl flex flex-col items-center justify-center gap-4">
-          <h2 className="text-primary text-4xl font-semibold fade-slide-up">
+        <div
+          className="flex-1 rounded-3xl flex flex-col items-center justify-center gap-4"
+          style={{ backgroundColor: "rgba(242,241,218,0.15)" }}
+        >
+          <h2
+            className="text-museum-cream text-4xl font-semibold"
+            style={{ animation: "fadeSlideUp 0.6s ease forwards" }}
+          >
             {t.resultsHeading}
           </h2>
           <p
-            className="text-primary font-semibold leading-none fade-slide-up"
-            style={{ fontSize: "8rem", animationDelay: "100ms", opacity: 0 }}
+            className="text-museum-cream font-semibold leading-none"
+            style={{
+              fontSize: "8rem",
+              animation: "fadeSlideUp 0.6s ease 100ms forwards",
+              opacity: 0,
+            }}
           >
             {animatedScore}
             <span className="opacity-30" style={{ fontSize: "4rem" }}>
@@ -368,28 +420,30 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
           </p>
         </div>
 
-        {/* Percentile card */}
         <div
-          className="flex-1 bg-museum-blue/40 rounded-3xl flex flex-col items-center justify-center gap-4"
+          className="flex-1 rounded-3xl flex flex-col items-center justify-center gap-4"
           style={{
+            backgroundColor: "rgba(242,241,218,0.15)",
             opacity: showPercentile ? 1 : 0,
             transform: showPercentile ? "translateY(0)" : "translateY(20px)",
             transition: "opacity 0.7s ease, transform 0.7s ease",
           }}
         >
-          <p className="text-primary text-3xl font-light text-center">
+          <p className="text-museum-cream text-3xl font-light text-center">
             {t.resultsBetterThan}
           </p>
           <p
-            className={`text-primary font-semibold leading-none${showPercentile ? " heartbeat" : ""}`}
+            className={`text-museum-cream font-semibold leading-none${
+              showPercentile ? " heartbeat" : ""
+            }`}
             style={{ fontSize: "8rem" }}
           >
             {animatedPct}%
           </p>
-          <p className="text-primary text-3xl font-light text-center">
+          <p className="text-museum-cream text-3xl font-light text-center">
             {t.resultsOfVisitors}
           </p>
-          <p className="text-primary/40 text-center text-lg mt-1">
+          <p className="text-museum-cream/40 text-center text-lg mt-1">
             {t.resultsBasedOn}{" "}
             <span className="font-semibold text-2xl">
               {stats.totalAttempts}
@@ -399,7 +453,6 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
         </div>
       </div>
 
-      {/* Buttons */}
       <div
         className="flex flex-col items-center gap-5 w-1/2"
         style={{
@@ -410,13 +463,13 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
       >
         <button
           onClick={onPlayAgain}
-          className="w-full bg-museum-crimson text-museum-cream font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
+          className="w-full bg-museum-cream text-primary font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
         >
           {t.playAgainBtn}
         </button>
         <button
           onClick={onHome}
-          className="w-full bg-museum-blue text-primary font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
+          className="w-full bg-museum-cream/20 text-museum-cream font-semibold text-3xl rounded-full py-10 border-2 border-museum-cream/30 hover:bg-museum-cream/30 transition-all duration-200"
         >
           {t.backBtn}
         </button>
