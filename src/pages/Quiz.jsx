@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useLanguage } from "../context/LanguageContext";
-import { useBlob } from "../context/BlobContext.jsx";
+import { useBlob } from "../context/BlobContext";
 import translations from "../../translations";
 import BackButton from "../components/BackButton";
 import { motion } from "framer-motion";
@@ -230,13 +230,12 @@ function Quiz() {
     <div
       className="w-screen h-screen flex flex-col overflow-hidden select-none font-flama"
       style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10,
         backgroundColor: "transparent",
-        position: "relative",
-        zIndex: 6,
       }}
     >
-      <BackButton onClick={handleBackAttempt} />
-
       {/* Quit dialog */}
       {showQuitDialog && (
         <div
@@ -279,7 +278,7 @@ function Quiz() {
         </div>
       )}
 
-      {/* Content */}
+      {/* Content — fades out on exit, so BackButton fades too */}
       <div
         className="flex flex-col flex-1 px-32 py-16"
         style={{
@@ -289,6 +288,7 @@ function Quiz() {
           transition: "opacity 0.4s ease, transform 0.4s ease",
         }}
       >
+        <BackButton onClick={handleBackAttempt} />
         {/* QUESTION */}
         {screen === SCREEN_QUESTION && (
           <div className="flex flex-col h-full">
