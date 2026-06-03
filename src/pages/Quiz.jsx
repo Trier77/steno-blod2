@@ -92,6 +92,10 @@ if (typeof document !== "undefined" && !document.getElementById("quiz-style")) {
       100% { transform: scale(1); }
     }
     .heartbeat { animation: heartbeat 1.6s ease-in-out infinite; }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   `;
   document.head.appendChild(s);
 }
@@ -105,6 +109,7 @@ const fadeUp = {
   }),
 };
 
+const SCREEN_INTRO = "intro";
 const SCREEN_QUESTION = "question";
 const SCREEN_EXPLANATION = "explanation";
 const SCREEN_RESULTS = "results";
@@ -115,7 +120,7 @@ function Quiz() {
   const { setExpanded } = useBlob();
   const t = translations[language].quiz;
 
-  const [screen, setScreen] = useState(SCREEN_QUESTION);
+  const [screen, setScreen] = useState(SCREEN_INTRO);
   const [fadeIn, setFadeIn] = useState(true);
   const [currentQ, setCurrentQ] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -131,7 +136,6 @@ function Quiz() {
   const isActiveQuiz =
     screen === SCREEN_QUESTION || screen === SCREEN_EXPLANATION;
 
-  // Fade content in after blob has had time to expand
   useEffect(() => {
     const id = setTimeout(() => setContentVisible(true), 400);
     return () => clearTimeout(id);
@@ -146,7 +150,6 @@ function Quiz() {
   };
 
   const navigateHome = () => {
-    // Fade content out, shrink blob, then navigate
     setContentVisible(false);
     setExpanded(false);
     setTimeout(() => navigate("/"), 1600);
@@ -211,22 +214,7 @@ function Quiz() {
     setTimeout(() => setShowQuitDialog(false), 300);
   };
 
-  const getOptionStyle = (index) => {
-    if (selectedAnswer === null) {
-      return "bg-museum-cream text-primary hover:opacity-90";
-    }
-    if (!showCorrect) {
-      if (index === selectedAnswer) return "bg-primary text-museum-cream";
-      return "bg-museum-cream text-primary opacity-40";
-    }
-    if (index === question.correct) return "bg-green-600 text-white";
-    if (index === selectedAnswer && !wasCorrect)
-      return "bg-primary text-museum-cream opacity-80";
-    return "bg-museum-cream text-primary opacity-30";
-  };
-
   return (
-    // Transparent background — the persistent blob from App.jsx is the background
     <div
       className="w-screen h-screen flex flex-col overflow-hidden select-none font-flama"
       style={{
@@ -236,7 +224,6 @@ function Quiz() {
         backgroundColor: "transparent",
       }}
     >
-      {/* Quit dialog */}
       {showQuitDialog && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -278,7 +265,6 @@ function Quiz() {
         </div>
       )}
 
-      {/* Content — fades out on exit, so BackButton fades too */}
       <div
         className="flex flex-col flex-1 px-32 py-16"
         style={{
@@ -289,6 +275,55 @@ function Quiz() {
         }}
       >
         <BackButton onClick={handleBackAttempt} />
+
+        {/* INTRO */}
+        {screen === SCREEN_INTRO && (
+          <div className="flex flex-col items-center justify-between h-full px-16 pt-8 pb-8">
+            <div className="flex-1 flex flex-col items-center justify-center gap-10 px-8">
+              <motion.h1
+                className="text-museum-cream font-semibold text-center"
+                style={{ fontSize: "6rem", lineHeight: 1.1 }}
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={0.1}
+              >
+                {t.title}
+              </motion.h1>
+              <motion.p
+                className="text-museum-cream/80 text-3xl text-center leading-relaxed font-light max-w-3xl"
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={0.25}
+              >
+                {t.intro}
+              </motion.p>
+              <motion.div
+                className="flex items-center gap-4"
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                custom={0.4}
+              >
+                <span className="text-museum-cream/60 text-2xl font-light">
+                  {t.questions.length} {t.introQuestionCount} · {t.introReady}
+                </span>
+              </motion.div>
+            </div>
+            <motion.button
+              onClick={() => transitionTo(SCREEN_QUESTION)}
+              className="bg-museum-cream text-primary font-semibold text-3xl rounded-full px-24 py-6 mb-4 hover:opacity-90 transition-opacity duration-200"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={0.55}
+            >
+              {t.startBtn}
+            </motion.button>
+          </div>
+        )}
+
         {/* QUESTION */}
         {screen === SCREEN_QUESTION && (
           <div className="flex flex-col h-full">
@@ -304,20 +339,35 @@ function Quiz() {
               </motion.h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-5 mb-8">
-              {question.options.map((option, i) => (
-                <motion.button
-                  key={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate="visible"
-                  custom={0.2 + i * 0.1}
-                  onClick={() => handleAnswer(i)}
-                  className={`rounded-2xl px-8 py-8 font-semibold text-2xl text-center transition-all duration-500 ${getOptionStyle(i)}`}
-                >
-                  {option}
-                </motion.button>
-              ))}
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              {question.options.map((option, i) => {
+                const getOptionStyle = () => {
+                  if (selectedAnswer === null)
+                    return "bg-museum-cream text-primary hover:opacity-90";
+                  if (!showCorrect) {
+                    if (i === selectedAnswer)
+                      return "bg-primary text-museum-cream";
+                    return "bg-museum-cream text-primary opacity-40";
+                  }
+                  if (i === question.correct) return "bg-green-600 text-white";
+                  if (i === selectedAnswer && !wasCorrect)
+                    return "bg-primary text-museum-cream opacity-80";
+                  return "bg-museum-cream text-primary opacity-30";
+                };
+                return (
+                  <motion.button
+                    key={i}
+                    variants={fadeUp}
+                    initial="hidden"
+                    animate="visible"
+                    custom={0.2 + i * 0.1}
+                    onClick={() => handleAnswer(i)}
+                    className={`rounded-2xl px-8 py-8 font-semibold text-2xl text-center transition-all duration-500 ${getOptionStyle()}`}
+                  >
+                    {option}
+                  </motion.button>
+                );
+              })}
             </div>
 
             <motion.div
@@ -433,9 +483,7 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
             {t.resultsBetterThan}
           </p>
           <p
-            className={`text-museum-cream font-semibold leading-none${
-              showPercentile ? " heartbeat" : ""
-            }`}
+            className={`text-museum-cream font-semibold leading-none${showPercentile ? " heartbeat" : ""}`}
             style={{ fontSize: "8rem" }}
           >
             {animatedPct}%

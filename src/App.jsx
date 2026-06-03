@@ -199,25 +199,14 @@ function PersistentBackground() {
           animationDelay={1}
           fade={expanded}
         />
-
-        {/* Language button */}
-        <foreignObject x="1760" y="990" width="150" height="85">
-          <div
-            xmlns="http://www.w3.org/1999/xhtml"
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "flex-end",
-              width: "100%",
-              height: "100%",
-              paddingRight: "12px",
-              paddingBottom: "8px",
-            }}
-          >
-            <FlagButton />
-          </div>
-        </foreignObject>
       </svg>
+
+      {/* Language button — always fixed bottom right, always clickable */}
+      <div
+        style={{ position: "fixed", bottom: "12px", right: "12px", zIndex: 50 }}
+      >
+        <FlagButton />
+      </div>
 
       {/* Quiz blob — always in DOM, scales up/down, clickable on start page */}
       <div
