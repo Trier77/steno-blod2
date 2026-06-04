@@ -145,7 +145,7 @@ function VideoPage() {
         )}
 
         <div
-          className="absolute bottom-0 left-0 right-0 px-12 py-8 flex items-center gap-8"
+          className="absolute bottom-0 left-0 right-0 px-12 pb-18 flex items-center gap-8"
           style={{
             background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
           }}

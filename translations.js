@@ -3,6 +3,11 @@ const translations = {
     startside: {
       museumName: "Museum Navn",
       exhibitionTitle: "Udstillingstitel",
+      blobs: {
+        quiz: ["Quiz om menstruation"],
+        video: ["Hør om forskning i", "menstruationsblod"],
+        cyklus: ["Udforsk menstruationens", "fire faser"],
+      },
       video1: {
         label: "Film 1",
         title: "Videotitel placeholder",
@@ -106,6 +111,11 @@ const translations = {
     startside: {
       museumName: "Museum Name",
       exhibitionTitle: "Exhibition Title",
+      blobs: {
+        quiz: ["Quiz about menstruation"],
+        video: ["Hear about research in", "menstrual blood"],
+        cyklus: ["Explore the four phases", "of menstruation"],
+      },
       video1: {
         label: "Film 1",
         title: "Video title placeholder",

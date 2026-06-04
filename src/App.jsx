@@ -1,7 +1,9 @@
 import { Route, Routes, useNavigate, useLocation } from "react-router";
 import { useState, useEffect } from "react";
 import { LanguageProvider } from "./context/LanguageContext";
+import { useLanguage } from "./context/LanguageContext";
 import { BlobProvider, useBlob } from "./context/BlobContext";
+import translations from "../translations";
 import Quiz from "./pages/Quiz";
 import VideoPage from "./pages/VideoPage";
 import FlagButton from "./components/FlagButton";
@@ -67,35 +69,45 @@ function BlobButton({
   );
 }
 
-function WaveText({ label, x, y, animationDelay = 0, fade = false }) {
-  const CHAR_WIDTH = 60;
-  const chars = label.split("");
-  const totalWidth = chars.length * CHAR_WIDTH;
-  const startX = x - totalWidth / 2;
+function WaveText({
+  lines,
+  x,
+  y,
+  animationDelay = 0,
+  fade = false,
+  fontSize = 58,
+}) {
+  const lineHeight = fontSize * 1.3;
+  const totalLines = lines.length;
+  const startY = y - ((totalLines - 1) * lineHeight) / 2;
+
   return (
-    <>
-      {chars.map((char, i) => (
+    <g
+      style={{
+        animation: `textFloat 3s ease-in-out infinite`,
+        animationDelay: `${animationDelay}s`,
+      }}
+    >
+      {lines.map((line, li) => (
         <text
-          key={i}
-          x={startX + i * CHAR_WIDTH + CHAR_WIDTH / 2}
-          y={y}
+          key={li}
+          x={x}
+          y={startY + li * lineHeight}
           textAnchor="middle"
           fill="#f2f1da"
-          fontSize="82"
+          fontSize={fontSize}
           fontWeight="600"
           fontFamily="Flama, sans-serif"
           style={{
             pointerEvents: "none",
-            animation: `letterWave 3s ease-in-out infinite`,
-            animationDelay: `${animationDelay + i * 0.16}s`,
             transition: "opacity 0.5s ease",
             opacity: fade ? 0 : 1,
           }}
         >
-          {char === " " ? "\u00A0" : char}
+          {line}
         </text>
       ))}
-    </>
+    </g>
   );
 }
 
@@ -103,6 +115,8 @@ function PersistentBackground() {
   const navigate = useNavigate();
   const location = useLocation();
   const { expanded, setExpanded, videoExpanded, setVideoExpanded } = useBlob();
+  const { language } = useLanguage();
+  const blobs = translations[language].startside.blobs;
 
   const [quizExpanding, setQuizExpanding] = useState(false);
   const [quizPressed, setQuizPressed] = useState(false);
@@ -170,6 +184,7 @@ function PersistentBackground() {
         @keyframes blobPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
         @keyframes blobPulseOuter { 0%, 100% { transform: scale(1.04); } 50% { transform: scale(1.06); } }
         @keyframes letterWave { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+        @keyframes textFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
       `}</style>
 
       <div
@@ -200,7 +215,7 @@ function PersistentBackground() {
           animationDelay="0s"
         />
         <WaveText
-          label="Cyklus"
+          lines={blobs.cyklus}
           x={400}
           y={250}
           animationDelay={0}
@@ -284,7 +299,7 @@ function PersistentBackground() {
             />
           </g>
           <WaveText
-            label="Video"
+            lines={blobs.video}
             x={1600}
             y={350}
             animationDelay={1}
@@ -363,7 +378,7 @@ function PersistentBackground() {
             />
           </g>
           <WaveText
-            label="QUIZ"
+            lines={blobs.quiz}
             x={720}
             y={1010}
             animationDelay={2}
