@@ -10,16 +10,15 @@ import "./App.css";
 const BLOB_TOP_LEFT = `
   M40.6,-59.2C48.1,-58.4,46.5,-39.5,52.3,-24.6C58,-9.6,71.1,1.2,75.2,14.7C79.4,28.2,74.6,44.3,62.2,48.1C49.9,51.9,30,43.2,14.1,47.7C-1.8,52.2,-13.7,69.7,-23.1,70.7C-32.5,71.6,-39.5,55.9,-39.8,42C-40.1,28.1,-33.8,16,-32.6,6.4C-31.4,-3.3,-35.3,-10.6,-37.8,-22.3C-40.3,-34,-41.5,-50.2,-34.9,-51.4C-28.4,-52.7,-14.2,-39,1.2,-40.8C16.6,-42.6,33.2,-60,40.6,-59.2Z
 `;
-
 const BLOB_TOP_RIGHT = `
   M20.2,-27.1C33.6,-22.9,57,-29.8,58.3,-26.7C59.6,-23.6,38.7,-10.5,32.7,2C26.7,14.5,35.5,26.5,36.3,38.7C37,50.9,29.6,63.3,19.9,64.9C10.2,66.4,-1.9,57,-17.9,55C-34,53.1,-54,58.6,-63,52.3C-72.1,46,-70.1,27.9,-60.3,16.1C-50.4,4.3,-32.6,-1.2,-28.7,-14.5C-24.8,-27.7,-34.7,-48.6,-32.3,-57.9C-29.8,-67.2,-14.9,-64.8,-5.7,-55.8C3.4,-46.9,6.8,-31.4,20.2,-27.1Z
 `;
-
 const BLOB_BOTTOM_LEFT = `
   M32.7,-50.8C45.8,-42.5,62,-39.1,65.1,-30.3C68.2,-21.5,58.1,-7.3,51.7,4.4C45.2,16,42.3,25.1,36.8,32.6C31.4,40,23.3,45.8,14.3,48.2C5.4,50.7,-4.5,49.6,-13.5,46.7C-22.5,43.7,-30.7,38.7,-32.9,31.3C-35.2,23.8,-31.4,13.9,-34.9,3.7C-38.5,-6.5,-49.4,-17,-52.5,-29.6C-55.5,-42.2,-50.8,-57,-40.7,-66.6C-30.7,-76.2,-15.4,-80.7,-2.8,-76.4C9.8,-72.1,19.7,-59,32.7,-50.8Z
 `;
 
-const EXPAND_SCALE = 50 / 8;
+const QUIZ_EXPAND_SCALE = 50 / 8;
+const VIDEO_EXPAND_SCALE = 50 / 9;
 
 function BlobButton({
   path,
@@ -103,59 +102,82 @@ function WaveText({ label, x, y, animationDelay = 0, fade = false }) {
 function PersistentBackground() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { expanded, setExpanded } = useBlob();
-  const [expanding, setExpanding] = useState(false);
+  const { expanded, setExpanded, videoExpanded, setVideoExpanded } = useBlob();
+
+  const [quizExpanding, setQuizExpanding] = useState(false);
   const [quizPressed, setQuizPressed] = useState(false);
-  // Controls when QUIZ label fades in after shrink
   const [quizTextVisible, setQuizTextVisible] = useState(true);
+
+  const [videoExpanding, setVideoExpanding] = useState(false);
+  const [videoPressed, setVideoPressed] = useState(false);
+  const [videoTextVisible, setVideoTextVisible] = useState(true);
+  const [videoOnTop, setVideoOnTop] = useState(false);
+
+  useEffect(() => {
+    if (videoExpanded) {
+      setVideoOnTop(true);
+    } else {
+      // Keep video blob on top for the full 1.5s shrink animation
+      const id = setTimeout(() => setVideoOnTop(false), 1600);
+      return () => clearTimeout(id);
+    }
+  }, [videoExpanded]);
+
+  const onStartPage = location.pathname === "/";
+  const anyExpanded = expanded || videoExpanded;
 
   useEffect(() => {
     if (expanded) {
       setQuizTextVisible(false);
     } else {
-      // Wait for shrink animation to nearly finish before fading text in
       const id = setTimeout(() => setQuizTextVisible(true), 1300);
       return () => clearTimeout(id);
     }
   }, [expanded]);
 
-  // Only show start screen interactive elements on "/"
-  const onStartPage = location.pathname === "/";
+  useEffect(() => {
+    if (videoExpanded) {
+      setVideoTextVisible(false);
+    } else {
+      const id = setTimeout(() => setVideoTextVisible(true), 1300);
+      return () => clearTimeout(id);
+    }
+  }, [videoExpanded]);
 
   const handleQuizTap = () => {
-    if (expanding || expanded) return;
-    setExpanding(true);
+    if (quizExpanding || anyExpanded) return;
+    setQuizExpanding(true);
     setExpanded(true);
     setTimeout(() => {
       navigate("/quiz");
-      setExpanding(false);
+      setQuizExpanding(false);
+    }, 1600);
+  };
+
+  const handleVideoTap = () => {
+    if (videoExpanding || anyExpanded) return;
+    setVideoExpanding(true);
+    setVideoExpanded(true);
+    setTimeout(() => {
+      navigate("/video/0");
+      setVideoExpanding(false);
     }, 1600);
   };
 
   return (
     <>
       <style>{`
-        @keyframes blobPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.02); }
-        }
-        @keyframes blobPulseOuter {
-          0%, 100% { transform: scale(1.04); }
-          50% { transform: scale(1.06); }
-        }
-        @keyframes letterWave {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
+        @keyframes blobPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blobPulseOuter { 0%, 100% { transform: scale(1.04); } 50% { transform: scale(1.06); } }
+        @keyframes letterWave { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
       `}</style>
 
-      {/* Cream background */}
       <div
         className="bg-museum-cream"
         style={{ position: "fixed", inset: 0, zIndex: 0 }}
       />
 
-      {/* Cyklus + Video blobs — always in DOM */}
+      {/* Cyklus blob */}
       <svg
         viewBox="0 0 1920 1080"
         xmlns="http://www.w3.org/2000/svg"
@@ -167,8 +189,7 @@ function PersistentBackground() {
           zIndex: 1,
           display: "block",
           overflow: "visible",
-          // Only interactive on start page and when not expanded
-          pointerEvents: onStartPage && !expanded ? "auto" : "none",
+          pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
         }}
       >
         <BlobButton
@@ -178,45 +199,29 @@ function PersistentBackground() {
           svgTransform="translate(240 0) scale(9) rotate(375)"
           animationDelay="0s"
         />
-        <BlobButton
-          path={BLOB_TOP_RIGHT}
-          label="Video"
-          onClick={() => navigate("/video/forsker")}
-          svgTransform="translate(1770 130) scale(9) rotate(10)"
-          animationDelay="1s"
-        />
         <WaveText
           label="Cyklus"
           x={400}
           y={250}
           animationDelay={0}
-          fade={expanded}
-        />
-        <WaveText
-          label="Video"
-          x={1600}
-          y={350}
-          animationDelay={1}
-          fade={expanded}
+          fade={anyExpanded}
         />
       </svg>
 
-      {/* Language button — always fixed bottom right, always clickable */}
       <div
         style={{ position: "fixed", bottom: "12px", right: "12px", zIndex: 50 }}
       >
         <FlagButton />
       </div>
 
-      {/* Quiz blob — always in DOM, scales up/down, clickable on start page */}
+      {/* Video blob — higher zIndex when expanded */}
       <div
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 2,
+          zIndex: videoOnTop ? 3 : 2,
           overflow: "hidden",
-          // Only intercept clicks on start page when not yet expanded
-          pointerEvents: onStartPage && !expanded ? "auto" : "none",
+          pointerEvents: "none",
         }}
       >
         <svg
@@ -227,6 +232,86 @@ function PersistentBackground() {
             height: "100%",
             display: "block",
             overflow: "visible",
+            pointerEvents: "none",
+          }}
+        >
+          <g
+            transform="translate(1770 130) scale(9) rotate(10)"
+            onClick={handleVideoTap}
+            onPointerDown={() => setVideoPressed(true)}
+            onPointerUp={() => setVideoPressed(false)}
+            onPointerLeave={() => setVideoPressed(false)}
+            style={{
+              cursor: onStartPage && !anyExpanded ? "pointer" : "default",
+              pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+            }}
+          >
+            <path
+              d={BLOB_TOP_RIGHT}
+              fill="#3d1118"
+              style={{
+                transformOrigin: "center",
+                transformBox: "fill-box",
+                animation:
+                  videoExpanded || videoPressed
+                    ? "none"
+                    : "blobPulseOuter 3s ease-in-out infinite 1s",
+                transition: "transform 1.5s ease-in-out",
+                transform: videoExpanded
+                  ? `scale(${VIDEO_EXPAND_SCALE * 1.04})`
+                  : "scale(1.04)",
+              }}
+            />
+            <path
+              d={BLOB_TOP_RIGHT}
+              fill="#631d27"
+              style={{
+                transformOrigin: "center",
+                transformBox: "fill-box",
+                filter:
+                  videoPressed && !videoExpanded
+                    ? "brightness(0.75)"
+                    : "brightness(1)",
+                animation:
+                  videoExpanded || videoPressed
+                    ? "none"
+                    : "blobPulse 3s ease-in-out infinite 1s",
+                transition: "transform 1.5s ease-in-out, filter 0.2s ease",
+                transform: videoExpanded
+                  ? `scale(${VIDEO_EXPAND_SCALE})`
+                  : "scale(1)",
+              }}
+            />
+          </g>
+          <WaveText
+            label="Video"
+            x={1600}
+            y={350}
+            animationDelay={1}
+            fade={!videoTextVisible}
+          />
+        </svg>
+      </div>
+
+      {/* Quiz blob — higher zIndex when expanded */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: expanded ? 3 : 2,
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        <svg
+          viewBox="0 0 1920 1080"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "block",
+            overflow: "visible",
+            pointerEvents: "none",
           }}
         >
           <g
@@ -235,7 +320,10 @@ function PersistentBackground() {
             onPointerDown={() => setQuizPressed(true)}
             onPointerUp={() => setQuizPressed(false)}
             onPointerLeave={() => setQuizPressed(false)}
-            style={{ cursor: onStartPage && !expanded ? "pointer" : "default" }}
+            style={{
+              cursor: onStartPage && !anyExpanded ? "pointer" : "default",
+              pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+            }}
           >
             <path
               d={BLOB_BOTTOM_LEFT}
@@ -249,7 +337,7 @@ function PersistentBackground() {
                     : "blobPulseOuter 3s ease-in-out infinite 2s",
                 transition: "transform 1.5s ease-in-out",
                 transform: expanded
-                  ? `scale(${EXPAND_SCALE * 1.04})`
+                  ? `scale(${QUIZ_EXPAND_SCALE * 1.04})`
                   : "scale(1.04)",
               }}
             />
@@ -268,11 +356,12 @@ function PersistentBackground() {
                     ? "none"
                     : "blobPulse 3s ease-in-out infinite 2s",
                 transition: "transform 1.5s ease-in-out, filter 0.2s ease",
-                transform: expanded ? `scale(${EXPAND_SCALE})` : "scale(1)",
+                transform: expanded
+                  ? `scale(${QUIZ_EXPAND_SCALE})`
+                  : "scale(1)",
               }}
             />
           </g>
-          {/* QUIZ label sits above the blob, fades with expansion */}
           <WaveText
             label="QUIZ"
             x={720}
@@ -290,7 +379,6 @@ function AppInner() {
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <PersistentBackground />
-
       <Routes>
         <Route path="/" element={null} />
         <Route path="/quiz" element={<Quiz />} />

@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
+import { useBlob } from "../context/BlobContext";
 import BackButton from "../components/BackButton";
 import mettestest from "../assets/mettestest.mp4";
 
-// Swap these out when the museum provides the actual video files
-const VIDEO_SOURCES = [
-  mettestest, // e.g. import video1 from "../assets/video1.mp4"
-mettestest, // e.g. import video2 from "../assets/video2.mp4"
-];
+const VIDEO_SOURCES = [mettestest, mettestest];
 
 function VideoPage() {
   const { id } = useParams();
-  const videoSrc = VIDEO_SOURCES[parseInt(id)];
+  const navigate = useNavigate();
+  const { setVideoExpanded } = useBlob();
+  const videoSrc = VIDEO_SOURCES[parseInt(id)] ?? VIDEO_SOURCES[0];
 
   const videoRef = useRef(null);
   const progressRef = useRef(null);
@@ -19,23 +18,37 @@ function VideoPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+
+  // Identical to Quiz — fade content in after blob has expanded
+  useEffect(() => {
+    const id = setTimeout(() => setContentVisible(true), 400);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoSrc) return;
-
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleLoaded = () => setDuration(video.duration);
-
+    const handleEnded = () => navigateHome();
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoaded);
+    video.addEventListener("ended", handleEnded);
     video.play().catch(() => {});
-
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoaded);
+      video.removeEventListener("ended", handleEnded);
     };
   }, [videoSrc]);
+
+  // Identical to Quiz navigateHome
+  const navigateHome = () => {
+    setContentVisible(false);
+    setVideoExpanded(false);
+    setTimeout(() => navigate("/"), 1600);
+  };
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -73,12 +86,10 @@ function VideoPage() {
     setDragging(true);
     getProgressFromEvent(e);
   };
-
   const handlePointerMove = (e) => {
     if (!dragging) return;
     getProgressFromEvent(e);
   };
-
   const handlePointerUp = () => setDragging(false);
 
   useEffect(() => {
@@ -96,79 +107,89 @@ function VideoPage() {
 
   const progress = duration ? currentTime / duration : 0;
 
+  // Identical to Quiz — transparent bg, zIndex 10, content fades in/out
   return (
-    <div className="w-screen h-screen bg-black relative overflow-hidden select-none font-flama">
-      <BackButton />
-
-      {/* Video */}
-      {videoSrc ? (
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          className="absolute inset-0 w-full h-full object-cover cursor-pointer"
-          onClick={togglePlay}
-          playsInline
-        />
-      ) : (
-        // Placeholder until museum provides video files
-        <div className="absolute inset-0 bg-museum-blue/30 flex items-center justify-center">
-          <p className="text-primary text-4xl font-semibold opacity-40 tracking-widest uppercase">
-            Video {id} — placeholder
-          </p>
-        </div>
-      )}
-
-      {/* Controls bar at the bottom */}
+    <div
+      className="w-screen h-screen overflow-hidden select-none font-flama"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10,
+        backgroundColor: "transparent",
+      }}
+    >
       <div
-        className="absolute bottom-0 left-0 right-0 px-12 py-8 flex items-center gap-8"
         style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+          opacity: contentVisible ? 1 : 0,
+          transition: "opacity 0.4s ease",
+          position: "absolute",
+          inset: 0,
         }}
       >
-        {/* Play/Pause */}
-        <button onClick={togglePlay} className="shrink-0">
-          {playing ? (
-            <svg
-              className="w-16 h-16 text-museum-cream"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-          ) : (
-            <svg
-              className="w-16 h-16 text-museum-cream"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
+        <BackButton onClick={navigateHome} />
 
-        {/* Progress bar */}
+        {videoSrc ? (
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+            onClick={togglePlay}
+            playsInline
+          />
+        ) : (
+          <div className="absolute inset-0 bg-museum-blue/30 flex items-center justify-center">
+            <p className="text-primary text-4xl font-semibold opacity-40 tracking-widest uppercase">
+              Video {id} — placeholder
+            </p>
+          </div>
+        )}
+
         <div
-          ref={progressRef}
-          className="relative flex-1 h-2 bg-museum-cream/30 rounded-full cursor-pointer"
-          onMouseDown={handlePointerDown}
-          onMouseMove={handlePointerMove}
-          onMouseUp={handlePointerUp}
-          onMouseLeave={handlePointerUp}
+          className="absolute bottom-0 left-0 right-0 px-12 py-8 flex items-center gap-8"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+          }}
         >
+          <button onClick={togglePlay} className="shrink-0">
+            {playing ? (
+              <svg
+                className="w-16 h-16 text-museum-cream"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+            ) : (
+              <svg
+                className="w-16 h-16 text-museum-cream"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </button>
           <div
-            className="absolute left-0 top-0 h-full bg-museum-cream rounded-full"
-            style={{ width: `${progress * 100}%` }}
-          />
-          <div
-            className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-museum-cream shadow"
-            style={{ left: `calc(${progress * 100}% - 12px)` }}
-          />
+            ref={progressRef}
+            className="relative flex-1 h-2 bg-museum-cream/30 rounded-full cursor-pointer"
+            onMouseDown={handlePointerDown}
+            onMouseMove={handlePointerMove}
+            onMouseUp={handlePointerUp}
+            onMouseLeave={handlePointerUp}
+          >
+            <div
+              className="absolute left-0 top-0 h-full bg-museum-cream rounded-full"
+              style={{ width: `${progress * 100}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-museum-cream shadow"
+              style={{ left: `calc(${progress * 100}% - 12px)` }}
+            />
+          </div>
+          <span className="text-museum-cream text-3xl shrink-0 font-light">
+            -{formatTime(duration - currentTime)}
+          </span>
         </div>
-
-        {/* Countdown */}
-        <span className="text-museum-cream text-3xl shrink-0 font-light">
-          -{formatTime(duration - currentTime)}
-        </span>
       </div>
     </div>
   );
