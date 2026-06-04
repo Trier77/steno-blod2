@@ -329,7 +329,7 @@ function Quiz() {
           <div className="flex flex-col h-full">
             <div className="flex-1 flex items-center justify-center px-16">
               <motion.h2
-                className="text-museum-cream text-4xl font-semibold text-center leading-snug"
+                className="text-museum-cream text-6xl font-semibold text-center leading-snug"
                 variants={fadeUp}
                 initial="hidden"
                 animate="visible"
@@ -362,7 +362,7 @@ function Quiz() {
                     animate="visible"
                     custom={0.2 + i * 0.1}
                     onClick={() => handleAnswer(i)}
-                    className={`rounded-2xl px-8 py-8 font-semibold text-2xl text-center transition-all duration-500 ${getOptionStyle()}`}
+                    className={`rounded-3xl px-8 py-8 font-semibold text-3xl text-center transition-all duration-500 ${getOptionStyle()}`}
                   >
                     {option}
                   </motion.button>
@@ -398,13 +398,13 @@ function Quiz() {
               <span className="text-museum-cream text-6xl font-semibold">
                 {wasCorrect ? t.correctLabel : t.wrongLabel}
               </span>
-              <p className="text-museum-cream/80 text-3xl text-center leading-relaxed font-light">
+              <p className="text-museum-cream text-3xl text-center leading-relaxed font-light">
                 {question.explanation}
               </p>
             </div>
             <button
               onClick={handleNext}
-              className="bg-museum-cream text-primary font-semibold text-2xl rounded-full px-16 py-5 mb-4 hover:opacity-90 transition-opacity duration-200"
+              className="bg-museum-cream text-primary font-semibold text-4xl rounded-full px-16 py-5 mb-20 transition-opacity duration-200"
             >
               {currentQ + 1 >= t.questions.length ? t.resultsTitle : t.nextBtn}
             </button>
@@ -491,7 +491,7 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
           <p className="text-museum-cream text-3xl font-light text-center">
             {t.resultsOfVisitors}
           </p>
-          <p className="text-museum-cream/40 text-center text-lg mt-1">
+          <p className="text-museum-cream text-center text-lg mt-1">
             {t.resultsBasedOn}{" "}
             <span className="font-semibold text-2xl">
               {stats.totalAttempts}
@@ -511,13 +511,13 @@ function ResultsScreen({ score, total, stats, t, onPlayAgain, onHome }) {
       >
         <button
           onClick={onPlayAgain}
-          className="w-full bg-museum-cream text-primary font-semibold text-3xl rounded-full py-10 hover:opacity-90 transition-opacity duration-200"
+          className="w-full bg-museum-cream/20 text-museum-cream border-2 border-museum-cream/40 font-semibold text-4xl rounded-full py-10 transition-opacity duration-200"
         >
           {t.playAgainBtn}
         </button>
         <button
           onClick={onHome}
-          className="w-full bg-museum-cream/20 text-museum-cream font-semibold text-3xl rounded-full py-10 border-2 border-museum-cream/30 hover:bg-museum-cream/30 transition-all duration-200"
+          className="w-full bg-museum-cream text-primary font-semibold text-4xl rounded-full py-10 border-5 border-primary transition-all duration-200"
         >
           {t.backBtn}
         </button>
