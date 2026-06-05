@@ -227,6 +227,7 @@ function Quiz() {
       {showQuitDialog && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={handleCancelQuit}
           style={{
             backgroundColor: `rgba(0,0,0,${quitVisible ? 0.5 : 0})`,
             transition: "background-color 0.3s ease",
@@ -234,6 +235,7 @@ function Quiz() {
         >
           <div
             className="bg-museum-cream rounded-3xl p-16 max-w-2xl w-full mx-8 flex flex-col items-center gap-8"
+            onClick={(e) => e.stopPropagation()}
             style={{
               opacity: quitVisible ? 1 : 0,
               transform: quitVisible ? "translateY(0)" : "translateY(20px)",
@@ -265,6 +267,16 @@ function Quiz() {
         </div>
       )}
 
+      {/* BackButton er udenfor fading-div så den altid er synlig */}
+      <div
+        style={{
+          opacity: contentVisible ? 1 : 0,
+          transition: "opacity 0.4s ease",
+        }}
+      >
+        <BackButton onClick={handleBackAttempt} />
+      </div>
+
       <div
         className="flex flex-col flex-1 px-32 py-16"
         style={{
@@ -274,8 +286,6 @@ function Quiz() {
           transition: "opacity 0.4s ease, transform 0.4s ease",
         }}
       >
-        <BackButton onClick={handleBackAttempt} />
-
         {/* INTRO */}
         {screen === SCREEN_INTRO && (
           <div className="flex flex-col items-center justify-between h-full px-16 pt-8 pb-8">

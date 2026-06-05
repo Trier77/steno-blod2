@@ -22,7 +22,7 @@ function VideoPage() {
 
   // Identical to Quiz — fade content in after blob has expanded
   useEffect(() => {
-    const id = setTimeout(() => setContentVisible(true), 400);
+    const id = setTimeout(() => setContentVisible(true), 200);
     return () => clearTimeout(id);
   }, []);
 

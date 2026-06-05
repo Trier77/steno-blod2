@@ -7,6 +7,9 @@ import translations from "../translations";
 import Quiz from "./pages/Quiz";
 import VideoPage from "./pages/VideoPage";
 import FlagButton from "./components/FlagButton";
+import questionIcon from "./assets/icons/question.png";
+import playIcon from "./assets/icons/play-button.png";
+import cyclusIcon from "./assets/icons/cyclus.png";
 import "./App.css";
 
 const BLOB_TOP_LEFT = `
@@ -21,6 +24,45 @@ const BLOB_BOTTOM_LEFT = `
 
 const QUIZ_EXPAND_SCALE = 50 / 8;
 const VIDEO_EXPAND_SCALE = 50 / 9;
+
+// ─────────────────────────────────────────────────────────────
+// QUIZ BLOB IKONER — juster hvert ikon her
+// x, y        → placering inde i blobben (-60 til 60 ca.)
+// size        → størrelse
+// opacity     → synlighed (0.05 = meget subtil, 0.3 = tydelig)
+// rotation    → grader (0-360)
+// ─────────────────────────────────────────────────────────────
+const QUIZ_ICONS = [
+  { x: -50, y: -60, size: 22, opacity: 0.3, rotation: -80 },
+  { x: -45, y: -25, size: 12, opacity: 0.3, rotation: -130 },
+  { x: -31, y: 20, size: 10, opacity: 0.3, rotation: -80 },
+  { x: -18, y: 25, size: 21, opacity: 0.3, rotation: 240 },
+  { x: -22, y: -18, size: 8, opacity: 0.2, rotation: 200 },
+];
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// VIDEO BLOB IKON
+// x, y        → placering inde i blobben
+// size        → størrelse
+// opacity     → synlighed
+// rotation    → grader
+// ─────────────────────────────────────────────────────────────
+const VIDEO_ICON = { x: -20, y: -20, size: 40, opacity: 0.15, rotation: 0 };
+// ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// CYKLUS BLOB IKONER
+// x, y        → placering inde i blobben (-60 til 60 ca.)
+// size        → størrelse
+// opacity     → synlighed (0.05 = meget subtil, 0.3 = tydelig)
+// rotation    → grader (0-360)
+// flipX       → vend vandret (true/false)
+// ─────────────────────────────────────────────────────────────
+const CYKLUS_ICONS = [
+  { x: -2, y: -6, size: 50, opacity: 0.2, rotation: 10, flipX: false },
+];
+// ─────────────────────────────────────────────────────────────
 
 function BlobButton({
   path,
@@ -80,7 +122,6 @@ function WaveText({
   const lineHeight = fontSize * 1.3;
   const totalLines = lines.length;
   const startY = y - ((totalLines - 1) * lineHeight) / 2;
-
   return (
     <g
       style={{
@@ -111,6 +152,59 @@ function WaveText({
   );
 }
 
+function IconWaveText({
+  icon,
+  lines,
+  x,
+  y,
+  animationDelay = 0,
+  fade = false,
+  fontSize = 58,
+  iconSize = 60,
+  iconGap = 20,
+}) {
+  const lineHeight = fontSize * 1.3;
+  const totalLines = lines.length;
+  const blockHeight = totalLines * lineHeight;
+  const startY = y - blockHeight / 2 + lineHeight * 0.8;
+  const iconX = x - iconSize / 2;
+  const iconY = y - iconSize / 2;
+  const textX = x + iconSize / 2 + iconGap;
+  return (
+    <g
+      style={{
+        animation: `textFloat 3s ease-in-out infinite`,
+        animationDelay: `${animationDelay}s`,
+        opacity: fade ? 0 : 1,
+        transition: "opacity 0.5s ease",
+      }}
+    >
+      <image
+        href={icon}
+        x={iconX}
+        y={iconY}
+        width={iconSize}
+        height={iconSize}
+      />
+      {lines.map((line, li) => (
+        <text
+          key={li}
+          x={textX}
+          y={startY + li * lineHeight}
+          textAnchor="start"
+          fill="#f2f1da"
+          fontSize={fontSize}
+          fontWeight="600"
+          fontFamily="Flama, sans-serif"
+          style={{ pointerEvents: "none" }}
+        >
+          {line}
+        </text>
+      ))}
+    </g>
+  );
+}
+
 function PersistentBackground() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,7 +225,6 @@ function PersistentBackground() {
     if (videoExpanded) {
       setVideoOnTop(true);
     } else {
-      // Keep video blob on top for the full 1.5s shrink animation
       const id = setTimeout(() => setVideoOnTop(false), 1600);
       return () => clearTimeout(id);
     }
@@ -140,15 +233,21 @@ function PersistentBackground() {
   const onStartPage = location.pathname === "/";
   const anyExpanded = expanded || videoExpanded;
 
+  const [quizIconsVisible, setQuizIconsVisible] = useState(true);
+
   useEffect(() => {
     if (expanded) {
       setQuizTextVisible(false);
+      setQuizIconsVisible(false);
     } else {
-      const id = setTimeout(() => setQuizTextVisible(true), 1300);
-      return () => clearTimeout(id);
+      const textId = setTimeout(() => setQuizTextVisible(true), 1300);
+      const iconId = setTimeout(() => setQuizIconsVisible(true), 1300);
+      return () => {
+        clearTimeout(textId);
+        clearTimeout(iconId);
+      };
     }
   }, [expanded]);
-
   useEffect(() => {
     if (videoExpanded) {
       setVideoTextVisible(false);
@@ -214,6 +313,26 @@ function PersistentBackground() {
           svgTransform="translate(240 0) scale(9) rotate(375)"
           animationDelay="0s"
         />
+        {/* Cyklus icons */}
+        <g transform="translate(240 0) scale(9) rotate(375)">
+          {CYKLUS_ICONS.map((icon, i) => (
+            <image
+              key={i}
+              href={cyclusIcon}
+              x={icon.x}
+              y={icon.y}
+              width={icon.size}
+              height={icon.size}
+              style={{
+                transformBox: "fill-box",
+                transformOrigin: "center",
+                transform: `rotate(${icon.rotation}deg) ${icon.flipX ? "scaleX(-1)" : ""}`,
+                opacity: anyExpanded ? 0 : icon.opacity,
+                transition: "opacity 0.4s ease",
+              }}
+            />
+          ))}
+        </g>
         <WaveText
           lines={blobs.cyklus}
           x={400}
@@ -229,7 +348,7 @@ function PersistentBackground() {
         <FlagButton />
       </div>
 
-      {/* Video blob — higher zIndex when expanded */}
+      {/* Video blob */}
       <div
         style={{
           position: "fixed",
@@ -298,17 +417,21 @@ function PersistentBackground() {
               }}
             />
           </g>
-          <WaveText
+          <IconWaveText
+            icon={playIcon}
             lines={blobs.video}
-            x={1600}
+            x={1270}
             y={350}
             animationDelay={1}
             fade={!videoTextVisible}
+            fontSize={55}
+            iconSize={120}
+            iconGap={25}
           />
         </svg>
       </div>
 
-      {/* Quiz blob — higher zIndex when expanded */}
+      {/* Quiz blob */}
       <div
         style={{
           position: "fixed",
@@ -376,6 +499,25 @@ function PersistentBackground() {
                   : "scale(1)",
               }}
             />
+
+            {/* Icons rendered from QUIZ_ICONS config above */}
+            {QUIZ_ICONS.map((icon, i) => (
+              <image
+                key={i}
+                href={questionIcon}
+                x={icon.x}
+                y={icon.y}
+                width={icon.size}
+                height={icon.size}
+                style={{
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                  transform: `rotate(${icon.rotation}deg)`,
+                  opacity: quizIconsVisible ? icon.opacity : 0,
+                  transition: "opacity 0.4s ease",
+                }}
+              />
+            ))}
           </g>
           <WaveText
             lines={blobs.quiz}
