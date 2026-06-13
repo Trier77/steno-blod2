@@ -6,6 +6,7 @@ const translations = {
       blobs: {
         quiz: ["Quiz om menstruation"],
         video: ["Hør om forskning i", "menstruationsblod"],
+        cyklus: ["Udforsk menstruationens", "fire faser"],
       },
       video1: {
         label: "Film 1",
@@ -25,7 +26,7 @@ const translations = {
     quiz: {
       title: "Quiz",
       intro:
-        "Test din viden om menstruation! Du vil blive stillet seks spørgsmål. Efter hvert svar vil du få en uddybende forklaring.",
+        "Test din viden om udstillingen. Du vil blive stillet spørgsmål, og efter hvert svar får du en forklaring.",
       introQuestionCount: "spørgsmål",
       introReady: "Er du klar?",
       startBtn: "Start quiz",
@@ -51,6 +52,22 @@ const translations = {
           correct: 1,
           explanation:
             "Det er meget forskelligt, hvornår en pige får sin menstruation. De fleste får den, når de er mellem 9 og 18 år. Piger får menstruation tidligere, end man gjorde i gamle dage – bl.a. fordi vi får bedre kost.",
+          icon: {
+            icon: "bind",
+            x: 72,
+            y: 6,
+            size: 200,
+            opacity: 0.8,
+            rotation: -1,
+          },
+          explanationIcon: {
+            icon: "blod",
+            x: 10,
+            y: 60,
+            size: 240,
+            opacity: 0.8,
+            rotation: -1,
+          },
         },
         {
           question: 'Hvad betyder ordet "menstruation"?',
@@ -58,6 +75,23 @@ const translations = {
           correct: 2,
           explanation:
             'Menstruation betyder "månedlig". Menstruationscyklussen varer i gennemsnit mellem 23 og 35 dage. Derfor har det fået navn fra det latinske ord "mensis", som betyder måned.',
+          icon: {
+            icon: "blod",
+            x: 75,
+            y: 8,
+            size: 200,
+            opacity: 0.8,
+            rotation: -1,
+          },
+          explanationIcon: [
+            {
+              icon: "calendar",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.6,
+            },
+          ],
         },
         {
           question:
@@ -66,6 +100,22 @@ const translations = {
           correct: 1,
           explanation:
             "I dag har en kvinde ca. 400 menstruationer i løbet af sit liv. For 150 år siden var tallet tættere på 40, bl.a. fordi kvinder havde mange graviditeter.",
+          icon: {
+            icon: "kvinde",
+            x: 70,
+            y: 38,
+            size: 200,
+            opacity: 0.99,
+          },
+          explanationIcon: [
+            {
+              icon: "tampon",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.8,
+            },
+          ],
         },
         {
           question:
@@ -78,6 +128,13 @@ const translations = {
           correct: 0,
           explanation:
             "Flest piger i teenageårene og kvinder i starten af 20'erne har voldsomme menstruationssmerter.",
+          icon: {
+            icon: "kvinde",
+            x: 70,
+            y: 38,
+            size: 200,
+            opacity: 0.99,
+          },
         },
         {
           question:
@@ -91,6 +148,15 @@ const translations = {
           correct: 1,
           explanation:
             "Det er svært at give én forklaring på, hvorfor forskere ikke har interesseret sig for menstruationsblod. Nogle af grundene er, at menstruation har været tabubelagt, og at forskningsverdenen historisk har været mest optaget af mandekroppen.",
+          explanationIcon: [
+            {
+              icon: "kop",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.8,
+            },
+          ],
         },
         {
           question: "Hvorfor undersøger forskere menstruationsblod?",
@@ -102,15 +168,41 @@ const translations = {
           correct: 1,
           explanation:
             "Menstruationsblod består af forskellige slags celler, proteiner og andre stoffer, som alt sammen kan fortælle forskere om kvinders sundhed.",
+          icon: {
+            icon: "science",
+            x: 90,
+            y: 5,
+            size: 240,
+            opacity: 0.99,
+          },
+          explanationIcon: [
+            {
+              icon: "kvinde",
+              x: 75,
+              y: 55,
+              size: 260,
+              opacity: 0.9,
+            },
+            {
+              icon: "blod",
+              x: 8,
+              y: 7,
+              size: 260,
+              opacity: 0.7,
+            },
+          ],
         },
       ],
     },
   },
   en: {
     startside: {
+      museumName: "Museum Name",
+      exhibitionTitle: "Exhibition Title",
       blobs: {
-        quiz: ["Menstruation Quiz"],
-        video: ["Learn about research", "on menstrual blood"],
+        quiz: ["Quiz about menstruation"],
+        video: ["Hear about research in", "menstrual blood"],
+        cyklus: ["Explore the four phases", "of menstruation"],
       },
       video1: {
         label: "Film 1",
@@ -130,16 +222,16 @@ const translations = {
     quiz: {
       title: "Quiz",
       intro:
-        "Test your knowledge of menstruation! You will be asked six questions. After each answer, an explanation will follow.",
+        "Test your knowledge about the exhibition. You will be asked questions, and after each answer you will receive an explanation.",
       introQuestionCount: "questions",
       introReady: "Are you ready?",
       startBtn: "Start quiz",
       nextBtn: "Next question",
       resultsTitle: "Results",
       playAgainBtn: "Try again",
-      backBtn: "← Back",
+      backBtn: "← Homepage",
       correctLabel: "Correct!",
-      wrongLabel: "Wrong!",
+      wrongLabel: "Incorrect!",
       quitTitle: "Are you sure?",
       quitBody: "If you leave the quiz now, you will lose all your progress.",
       quitConfirm: "Leave quiz",
@@ -156,6 +248,22 @@ const translations = {
           correct: 1,
           explanation:
             "It varies greatly when a girl gets her first period. Most girls get their period when they are between 9 and 18 years old. Girls now get their period earlier than previous generations, partly due to improved nutrition.",
+          icon: {
+            icon: "bind",
+            x: 72,
+            y: 6,
+            size: 200,
+            opacity: 0.8,
+            rotation: -1,
+          },
+          explanationIcon: {
+            icon: "blod",
+            x: 10,
+            y: 60,
+            size: 240,
+            opacity: 0.8,
+            rotation: -1,
+          },
         },
         {
           question: 'What does the word "menstruation" mean?',
@@ -163,6 +271,23 @@ const translations = {
           correct: 2,
           explanation:
             'Menstruation means "monthly". A menstrual cycle averages between 23 to 35 days. Its name is therefore derived from the Latin word "mensis", which means month.',
+          icon: {
+            icon: "blod",
+            x: 75,
+            y: 8,
+            size: 200,
+            opacity: 0.8,
+            rotation: -1,
+          },
+          explanationIcon: [
+            {
+              icon: "calendar",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.6,
+            },
+          ],
         },
         {
           question: "How many periods does a woman have during her life?",
@@ -170,6 +295,22 @@ const translations = {
           correct: 1,
           explanation:
             "Today, a woman has about 400 periods during her life. 150 years ago, the number was closer to 40, partly because women had many pregnancies.",
+          icon: {
+            icon: "kvinde",
+            x: 70,
+            y: 42,
+            size: 200,
+            opacity: 0.99,
+          },
+          explanationIcon: [
+            {
+              icon: "tampon",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.8,
+            },
+          ],
         },
         {
           question:
@@ -182,6 +323,13 @@ const translations = {
           correct: 0,
           explanation:
             "Teenage girls and women in the beginning of their 20s have the most severe menstrual cramps.",
+          icon: {
+            icon: "kvinde",
+            x: 70,
+            y: 38,
+            size: 200,
+            opacity: 0.99,
+          },
         },
         {
           question:
@@ -195,7 +343,17 @@ const translations = {
           correct: 1,
           explanation:
             "It's difficult to give a single explanation as to why researchers have not been interested in menstrual blood. Some of the reasons are that menstruation is a taboo subject, and that the research community historically has favoured the male body in research.",
+          explanationIcon: [
+            {
+              icon: "kop",
+              x: 70,
+              y: 55,
+              size: 240,
+              opacity: 0.8,
+            },
+          ],
         },
+
         {
           question: "Why do researchers study menstrual blood?",
           options: [
@@ -206,6 +364,29 @@ const translations = {
           correct: 1,
           explanation:
             "Menstrual blood consists of different types of cells, proteins, and other compounds, which can all tell researchers about women's health.",
+          icon: {
+            icon: "science",
+            x: 85,
+            y: 5,
+            size: 240,
+            opacity: 0.99,
+          },
+          explanationIcon: [
+            {
+              icon: "kvinde",
+              x: 75,
+              y: 55,
+              size: 260,
+              opacity: 0.9,
+            },
+            {
+              icon: "blod",
+              x: 8,
+              y: 7,
+              size: 260,
+              opacity: 0.7,
+            },
+          ],
         },
       ],
     },

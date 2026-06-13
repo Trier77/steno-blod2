@@ -29,10 +29,10 @@ const VIDEO_EXPAND_SCALE = 35 / 9;
 // rotation    → grader (0-360)
 // ─────────────────────────────────────────────────────────────
 const QUIZ_ICONS = [
-  { x: -51, y: -55, size: 23, opacity: 0.3, rotation: -110 },
-  { x: -30, y: 1, size: 14, opacity: 0.3, rotation: -90 },
-  { x: -5, y: -5, size: 35, opacity: 0.1, rotation: 200 },
-  { x: -28, y: 17, size: 21, opacity: 0.3, rotation: 230 },
+  { x: -51, y: -55, size: 18, opacity: 0.3, rotation: -130 },
+  { x: -18, y: 14, size: 14, opacity: 0.3, rotation: -110 },
+
+  { x: -16, y: 22, size: 21, opacity: 0.3, rotation: 210 },
 ];
 // ─────────────────────────────────────────────────────────────
 

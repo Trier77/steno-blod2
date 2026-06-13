@@ -6,6 +6,30 @@ import translations from "../../translations";
 import BackButton from "../components/BackButton";
 import { motion } from "framer-motion";
 
+// ─────────────────────────────────────────────────────────────
+// QUESTION ICONS — importer dine SVG'er fra src/assets/icons her
+// og giv dem et navn i ICON_MAP. Navnet er det du bruger i
+// translations.js under hvert spørgsmåls "icons" array.
+// ─────────────────────────────────────────────────────────────
+import scienceIcon from "../assets/icons/forskning.svg";
+import calendarIcon from "../assets/icons/kalender.svg";
+import kvindeIcon from "../assets/icons/kvinde.svg";
+import kopIcon from "../assets/icons/kop.svg";
+import tamponIcon from "../assets/icons/tampon.svg";
+import blodIcon from "../assets/icons/bloddråber.svg";
+import bindIcon from "../assets/icons/bind.svg";
+
+const ICON_MAP = {
+  science: scienceIcon,
+  calendar: calendarIcon,
+  kvinde: kvindeIcon,
+  kop: kopIcon,
+  tampon: tamponIcon,
+  blod: blodIcon,
+  bind: bindIcon,
+};
+// ─────────────────────────────────────────────────────────────
+
 const STORAGE_KEY = "museum_quiz_scores";
 const ATTEMPTS_KEY = "museum_quiz_attempts";
 
@@ -108,6 +132,40 @@ const fadeUp = {
     transition: { duration: 0.55, ease: [0.4, 0, 0.2, 1], delay },
   }),
 };
+
+// Renders one or more decorative icons.
+// Accepts either a single icon object or an array of icon objects:
+// { icon: "calendar", x: 5, y: 8, size: 70, opacity: 0.12, rotation: -10 }
+// x/y are in percent (0-100) of the screen, so they scale with screen size.
+function QuestionIcons({ icon }) {
+  if (!icon) return null;
+  const items = Array.isArray(icon) ? icon : [icon];
+  return (
+    <>
+      {items.map((item, i) => {
+        const src = ICON_MAP[item.icon];
+        if (!src) return null;
+        return (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            style={{
+              position: "absolute",
+              left: `${item.x}%`,
+              top: `${item.y}%`,
+              width: item.size ?? 60,
+              height: item.size ?? 60,
+              opacity: item.opacity ?? 0.15,
+              transform: `rotate(${item.rotation ?? 0}deg)`,
+              pointerEvents: "none",
+            }}
+          />
+        );
+      })}
+    </>
+  );
+}
 
 const SCREEN_INTRO = "intro";
 const SCREEN_QUESTION = "question";
@@ -336,7 +394,11 @@ function Quiz() {
 
         {/* QUESTION */}
         {screen === SCREEN_QUESTION && (
-          <div className="flex flex-col h-full">
+          <div
+            className="flex flex-col h-full"
+            style={{ position: "relative" }}
+          >
+            <QuestionIcons icon={question.icon} />
             <div className="flex-1 flex items-center justify-center px-16">
               <motion.h2
                 className="text-museum-cream text-6xl font-semibold text-center leading-snug"
@@ -403,7 +465,11 @@ function Quiz() {
 
         {/* EXPLANATION */}
         {screen === SCREEN_EXPLANATION && (
-          <div className="flex flex-col items-center justify-between h-full">
+          <div
+            className="flex flex-col items-center justify-between h-full"
+            style={{ position: "relative" }}
+          >
+            <QuestionIcons icon={question.explanationIcon} />
             <div className="flex-1 flex flex-col items-center justify-center gap-10 px-16">
               <span className="text-museum-cream text-6xl font-semibold">
                 {wasCorrect ? t.correctLabel : t.wrongLabel}
