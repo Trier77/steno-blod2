@@ -9,12 +9,8 @@ import VideoPage from "./pages/VideoPage";
 import FlagButton from "./components/FlagButton";
 import questionIcon from "./assets/icons/question.png";
 import playIcon from "./assets/icons/play-button.png";
-import cyclusIcon from "./assets/icons/cyclus.png";
 import "./App.css";
 
-const BLOB_TOP_LEFT = `
-  M40.6,-59.2C48.1,-58.4,46.5,-39.5,52.3,-24.6C58,-9.6,71.1,1.2,75.2,14.7C79.4,28.2,74.6,44.3,62.2,48.1C49.9,51.9,30,43.2,14.1,47.7C-1.8,52.2,-13.7,69.7,-23.1,70.7C-32.5,71.6,-39.5,55.9,-39.8,42C-40.1,28.1,-33.8,16,-32.6,6.4C-31.4,-3.3,-35.3,-10.6,-37.8,-22.3C-40.3,-34,-41.5,-50.2,-34.9,-51.4C-28.4,-52.7,-14.2,-39,1.2,-40.8C16.6,-42.6,33.2,-60,40.6,-59.2Z
-`;
 const BLOB_TOP_RIGHT = `
   M20.2,-27.1C33.6,-22.9,57,-29.8,58.3,-26.7C59.6,-23.6,38.7,-10.5,32.7,2C26.7,14.5,35.5,26.5,36.3,38.7C37,50.9,29.6,63.3,19.9,64.9C10.2,66.4,-1.9,57,-17.9,55C-34,53.1,-54,58.6,-63,52.3C-72.1,46,-70.1,27.9,-60.3,16.1C-50.4,4.3,-32.6,-1.2,-28.7,-14.5C-24.8,-27.7,-34.7,-48.6,-32.3,-57.9C-29.8,-67.2,-14.9,-64.8,-5.7,-55.8C3.4,-46.9,6.8,-31.4,20.2,-27.1Z
 `;
@@ -22,8 +18,8 @@ const BLOB_BOTTOM_LEFT = `
   M32.7,-50.8C45.8,-42.5,62,-39.1,65.1,-30.3C68.2,-21.5,58.1,-7.3,51.7,4.4C45.2,16,42.3,25.1,36.8,32.6C31.4,40,23.3,45.8,14.3,48.2C5.4,50.7,-4.5,49.6,-13.5,46.7C-22.5,43.7,-30.7,38.7,-32.9,31.3C-35.2,23.8,-31.4,13.9,-34.9,3.7C-38.5,-6.5,-49.4,-17,-52.5,-29.6C-55.5,-42.2,-50.8,-57,-40.7,-66.6C-30.7,-76.2,-15.4,-80.7,-2.8,-76.4C9.8,-72.1,19.7,-59,32.7,-50.8Z
 `;
 
-const QUIZ_EXPAND_SCALE = 50 / 8;
-const VIDEO_EXPAND_SCALE = 50 / 9;
+const QUIZ_EXPAND_SCALE = 35 / 8;
+const VIDEO_EXPAND_SCALE = 35 / 9;
 
 // ─────────────────────────────────────────────────────────────
 // QUIZ BLOB IKONER — juster hvert ikon her
@@ -33,11 +29,10 @@ const VIDEO_EXPAND_SCALE = 50 / 9;
 // rotation    → grader (0-360)
 // ─────────────────────────────────────────────────────────────
 const QUIZ_ICONS = [
-  { x: -50, y: -60, size: 22, opacity: 0.3, rotation: -80 },
-  { x: -45, y: -25, size: 12, opacity: 0.3, rotation: -130 },
-  { x: -31, y: 20, size: 10, opacity: 0.3, rotation: -80 },
-  { x: -18, y: 25, size: 21, opacity: 0.3, rotation: 240 },
-  { x: -22, y: -18, size: 8, opacity: 0.2, rotation: 200 },
+  { x: -51, y: -55, size: 23, opacity: 0.3, rotation: -110 },
+  { x: -30, y: 1, size: 14, opacity: 0.3, rotation: -90 },
+  { x: -5, y: -5, size: 35, opacity: 0.1, rotation: 200 },
+  { x: -28, y: 17, size: 21, opacity: 0.3, rotation: 230 },
 ];
 // ─────────────────────────────────────────────────────────────
 
@@ -48,68 +43,8 @@ const QUIZ_ICONS = [
 // opacity     → synlighed
 // rotation    → grader
 // ─────────────────────────────────────────────────────────────
-const VIDEO_ICON = { x: -20, y: -20, size: 40, opacity: 0.15, rotation: 0 };
+const VIDEO_ICON = { x: -20, y: -20, size: 45, opacity: 0.15, rotation: 0 };
 // ─────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────
-// CYKLUS BLOB IKONER
-// x, y        → placering inde i blobben (-60 til 60 ca.)
-// size        → størrelse
-// opacity     → synlighed (0.05 = meget subtil, 0.3 = tydelig)
-// rotation    → grader (0-360)
-// flipX       → vend vandret (true/false)
-// ─────────────────────────────────────────────────────────────
-const CYKLUS_ICONS = [
-  { x: -2, y: -6, size: 50, opacity: 0.2, rotation: 10, flipX: false },
-];
-// ─────────────────────────────────────────────────────────────
-
-function BlobButton({
-  path,
-  label,
-  onClick,
-  svgTransform,
-  animationDelay = "0s",
-}) {
-  const [pressed, setPressed] = useState(false);
-  return (
-    <g
-      transform={svgTransform}
-      onClick={onClick}
-      onPointerDown={() => setPressed(true)}
-      onPointerUp={() => setPressed(false)}
-      onPointerLeave={() => setPressed(false)}
-      style={{ cursor: "pointer" }}
-      role="button"
-      aria-label={label}
-    >
-      <path
-        d={path}
-        fill="#3d1118"
-        style={{
-          transformOrigin: "center",
-          transformBox: "fill-box",
-          animation: pressed
-            ? "none"
-            : `blobPulseOuter 3s ease-in-out infinite ${animationDelay}`,
-        }}
-      />
-      <path
-        d={path}
-        fill="#631d27"
-        style={{
-          transformOrigin: "center",
-          transformBox: "fill-box",
-          transition: "filter 0.2s ease",
-          filter: pressed ? "brightness(0.75)" : "brightness(1)",
-          animation: pressed
-            ? "none"
-            : `blobPulse 3s ease-in-out infinite ${animationDelay}`,
-        }}
-      />
-    </g>
-  );
-}
 
 function WaveText({
   lines,
@@ -117,7 +52,7 @@ function WaveText({
   y,
   animationDelay = 0,
   fade = false,
-  fontSize = 58,
+  fontSize = 78,
 }) {
   const lineHeight = fontSize * 1.3;
   const totalLines = lines.length;
@@ -248,6 +183,7 @@ function PersistentBackground() {
       };
     }
   }, [expanded]);
+
   useEffect(() => {
     if (videoExpanded) {
       setVideoTextVisible(false);
@@ -291,57 +227,6 @@ function PersistentBackground() {
         style={{ position: "fixed", inset: 0, zIndex: 0 }}
       />
 
-      {/* Cyklus blob */}
-      <svg
-        viewBox="0 0 1920 1080"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 1,
-          display: "block",
-          overflow: "visible",
-          pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
-        }}
-      >
-        <BlobButton
-          path={BLOB_TOP_LEFT}
-          label="Cyklus"
-          onClick={() => navigate("/cyklusser")}
-          svgTransform="translate(240 0) scale(9) rotate(375)"
-          animationDelay="0s"
-        />
-        {/* Cyklus icons */}
-        <g transform="translate(240 0) scale(9) rotate(375)">
-          {CYKLUS_ICONS.map((icon, i) => (
-            <image
-              key={i}
-              href={cyclusIcon}
-              x={icon.x}
-              y={icon.y}
-              width={icon.size}
-              height={icon.size}
-              style={{
-                transformBox: "fill-box",
-                transformOrigin: "center",
-                transform: `rotate(${icon.rotation}deg) ${icon.flipX ? "scaleX(-1)" : ""}`,
-                opacity: anyExpanded ? 0 : icon.opacity,
-                transition: "opacity 0.4s ease",
-              }}
-            />
-          ))}
-        </g>
-        <WaveText
-          lines={blobs.cyklus}
-          x={400}
-          y={250}
-          animationDelay={0}
-          fade={anyExpanded}
-        />
-      </svg>
-
       <div
         style={{ position: "fixed", bottom: "12px", right: "12px", zIndex: 50 }}
       >
@@ -370,7 +255,7 @@ function PersistentBackground() {
           }}
         >
           <g
-            transform="translate(1770 130) scale(9) rotate(10)"
+            transform="translate(1670 -20) scale(11) rotate(10)"
             onClick={handleVideoTap}
             onPointerDown={() => setVideoPressed(true)}
             onPointerUp={() => setVideoPressed(false)}
@@ -420,12 +305,12 @@ function PersistentBackground() {
           <IconWaveText
             icon={playIcon}
             lines={blobs.video}
-            x={1270}
-            y={350}
+            x={1100}
+            y={300}
             animationDelay={1}
             fade={!videoTextVisible}
-            fontSize={55}
-            iconSize={120}
+            fontSize={60}
+            iconSize={140}
             iconGap={25}
           />
         </svg>
@@ -453,7 +338,7 @@ function PersistentBackground() {
           }}
         >
           <g
-            transform="translate(600 1150) scale(8) rotate(110)"
+            transform="translate(350 950) scale(11) rotate(130)"
             onClick={handleQuizTap}
             onPointerDown={() => setQuizPressed(true)}
             onPointerUp={() => setQuizPressed(false)}
@@ -521,8 +406,8 @@ function PersistentBackground() {
           </g>
           <WaveText
             lines={blobs.quiz}
-            x={720}
-            y={1010}
+            x={520}
+            y={870}
             animationDelay={2}
             fade={!quizTextVisible}
           />

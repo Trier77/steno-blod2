@@ -6,7 +6,6 @@ const translations = {
       blobs: {
         quiz: ["Quiz om menstruation"],
         video: ["Hør om forskning i", "menstruationsblod"],
-        cyklus: ["Udforsk menstruationens", "fire faser"],
       },
       video1: {
         label: "Film 1",
@@ -26,7 +25,7 @@ const translations = {
     quiz: {
       title: "Quiz",
       intro:
-        "Test din viden om udstillingen. Du vil blive stillet spørgsmål, og efter hvert svar får du en forklaring.",
+        "Test din viden om menstruation! Du vil blive stillet seks spørgsmål. Efter hvert svar vil du få en uddybende forklaring.",
       introQuestionCount: "spørgsmål",
       introReady: "Er du klar?",
       startBtn: "Start quiz",
@@ -109,12 +108,9 @@ const translations = {
   },
   en: {
     startside: {
-      museumName: "Museum Name",
-      exhibitionTitle: "Exhibition Title",
       blobs: {
-        quiz: ["Quiz about menstruation"],
-        video: ["Hear about research in", "menstrual blood"],
-        cyklus: ["Explore the four phases", "of menstruation"],
+        quiz: ["Menstruation Quiz"],
+        video: ["Learn about research", "on menstrual blood"],
       },
       video1: {
         label: "Film 1",
@@ -134,7 +130,7 @@ const translations = {
     quiz: {
       title: "Quiz",
       intro:
-        "Test your knowledge about the exhibition. You will be asked questions, and after each answer you will receive an explanation.",
+        "Test your knowledge of menstruation! You will be asked six questions. After each answer, an explanation will follow.",
       introQuestionCount: "questions",
       introReady: "Are you ready?",
       startBtn: "Start quiz",
