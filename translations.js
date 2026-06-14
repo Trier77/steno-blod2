@@ -195,10 +195,17 @@ const translations = {
       resultsBasedOn: "Based on",
       resultsAttempts: "attempts in total",
       introIcons: [
-        { icon: "bind", x: 5, y: 10, size: 150, opacity: 0.6, rotation: -10 },
-        { icon: "blod", x: 80, y: 60, size: 120, opacity: 0.5, rotation: 5 },
-        { icon: "kvinde", x: 70, y: 5, size: 180, opacity: 0.4, rotation: 0 },
-        { icon: "tampon", x: 8, y: 65, size: 130, opacity: 0.5, rotation: 15 },
+        {
+          icon: "science",
+          x: 80,
+          y: 10,
+          size: 240,
+          opacity: 0.3,
+          rotation: 10,
+        },
+        { icon: "blod", x: 17, y: 63, size: 250, opacity: 0.3 },
+        { icon: "kop", x: 7, y: 15, size: 220, opacity: 0.3, rotation: -10 },
+        { icon: "tampon", x: 75, y: 60, size: 200, opacity: 0.3, rotation: 15 },
       ],
       questions: [
         {
