@@ -2,15 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useBlob } from "../context/BlobContext";
 import BackButton from "../components/BackButton";
-import mettestest from "../assets/mettestest.mp4";
+import BlodVidDA from "../assets/isabella2da.mp4";
+import BlodVidEN from "../assets/isabella2en.mp4";
+import { useLanguage } from "../context/LanguageContext";
 
-const VIDEO_SOURCES = [mettestest, mettestest];
+const VIDEO_SOURCES = {
+  da: [BlodVidDA, /* andre danske videoer */],
+  en: [BlodVidEN, /* andre engelske videoer */],
+};
 
 function VideoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setVideoExpanded } = useBlob();
-  const videoSrc = VIDEO_SOURCES[parseInt(id)] ?? VIDEO_SOURCES[0];
+  const { language } = useLanguage();
+  const videoSrc = VIDEO_SOURCES[language]?.[parseInt(id)] ?? VIDEO_SOURCES["da"][0];
 
   const videoRef = useRef(null);
   const progressRef = useRef(null);
@@ -107,6 +113,23 @@ function VideoPage() {
 
   const progress = duration ? currentTime / duration : 0;
 
+
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimerRef = useRef(null);
+
+  // Viser kontroller og starter nedtælling til at skjule dem igen
+  const revealControls = () => {
+    setShowControls(true);
+    clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 3000);
+  };
+
+  // Skjuler kontroller efter 1 sekund når videoen starter
+  useEffect(() => {
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), 1000);
+    return () => clearTimeout(controlsTimerRef.current);
+  }, []);
+
   // Identical to Quiz — transparent bg, zIndex 10, content fades in/out
   return (
     <div
@@ -116,7 +139,9 @@ function VideoPage() {
         inset: 0,
         zIndex: 10,
         backgroundColor: "transparent",
+        
       }}
+      onClick={revealControls}
     >
       <div
         style={{
@@ -148,6 +173,9 @@ function VideoPage() {
           className="absolute bottom-0 left-0 right-0 px-12 pb-18 flex items-center gap-8"
           style={{
             background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)",
+            opacity: showControls ? 1 : 0,
+            transition: "opacity 0.4s ease",
+            pointerEvents: showControls ? "auto" : "none",
           }}
         >
           <button onClick={togglePlay} className="shrink-0">
