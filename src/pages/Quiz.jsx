@@ -349,7 +349,11 @@ function Quiz() {
       >
         {/* INTRO */}
         {screen === SCREEN_INTRO && (
-          <div className="flex flex-col items-center justify-between h-full px-16 pt-8 pb-8">
+          <div
+            className="flex flex-col items-center justify-between h-full px-16 pt-8 pb-8"
+            style={{ position: "relative" }}
+          >
+            <QuestionIcons icon={t.introIcons} />
             <div className="flex-1 flex flex-col items-center justify-center gap-10 px-8">
               <motion.h1
                 className="text-museum-cream font-semibold text-center"
