@@ -215,7 +215,10 @@ function Quiz() {
 
   const handleAnswer = (index) => {
     if (selectedAnswer !== null) return;
-    const correct = index === question.correct;
+    const correctAnswers = Array.isArray(question.correct)
+      ? question.correct
+      : [question.correct];
+    const correct = correctAnswers.includes(index);
     setSelectedAnswer(index);
     setWasCorrect(correct);
     if (correct) setScore((s) => s + 1);
@@ -414,6 +417,9 @@ function Quiz() {
             <div className="grid grid-cols-2 gap-6 mb-8">
               {question.options.map((option, i) => {
                 const getOptionStyle = () => {
+                  const correctAnswers = Array.isArray(question.correct)
+                    ? question.correct
+                    : [question.correct];
                   if (selectedAnswer === null)
                     return "bg-museum-cream text-primary hover:opacity-90";
                   if (!showCorrect) {
@@ -421,7 +427,8 @@ function Quiz() {
                       return "bg-primary text-museum-cream";
                     return "bg-museum-cream text-primary opacity-40";
                   }
-                  if (i === question.correct) return "bg-green-600 text-white";
+                  if (correctAnswers.includes(i))
+                    return "bg-green-600 text-white";
                   if (i === selectedAnswer && !wasCorrect)
                     return "bg-primary text-museum-cream opacity-80";
                   return "bg-museum-cream text-primary opacity-30";

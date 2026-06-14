@@ -49,7 +49,7 @@ const translations = {
         {
           question: "Hvornår får en pige typisk sin første menstruation?",
           options: ["9 år", "13 år", "18 år"],
-          correct: 1,
+          correct: [0, 1, 2],
           explanation:
             "Det er meget forskelligt, hvornår en pige får sin menstruation. De fleste får den, når de er mellem 9 og 18 år. Piger får menstruation tidligere, end man gjorde i gamle dage – bl.a. fordi vi får bedre kost.",
           icon: {
@@ -145,7 +145,7 @@ const translations = {
             "Forskere har syntes, at blodet var ulækkert",
             "Menstruationen har været tabubelagt",
           ],
-          correct: 1,
+          correct: [1, 3],
           explanation:
             "Det er svært at give én forklaring på, hvorfor forskere ikke har interesseret sig for menstruationsblod. Nogle af grundene er, at menstruation har været tabubelagt, og at forskningsverdenen historisk har været mest optaget af mandekroppen.",
           explanationIcon: [
@@ -245,7 +245,7 @@ const translations = {
         {
           question: "When does a girl typically get her first period?",
           options: ["9 years old", "13 years old", "18 years old"],
-          correct: 1,
+          correct: [0, 1, 2],
           explanation:
             "It varies greatly when a girl gets her first period. Most girls get their period when they are between 9 and 18 years old. Girls now get their period earlier than previous generations, partly due to improved nutrition.",
           icon: {
@@ -340,7 +340,7 @@ const translations = {
             "Researchers have found menstrual blood to be 'gross'",
             "Menstruation has been a taboo",
           ],
-          correct: 1,
+          correct: [1, 3],
           explanation:
             "It's difficult to give a single explanation as to why researchers have not been interested in menstrual blood. Some of the reasons are that menstruation is a taboo subject, and that the research community historically has favoured the male body in research.",
           explanationIcon: [
