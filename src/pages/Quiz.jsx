@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useLanguage } from "../context/LanguageContext";
 import { useBlob } from "../context/BlobContext";
@@ -213,6 +213,8 @@ function Quiz() {
     setTimeout(() => navigate("/"), 1600);
   };
 
+  const answerTimersRef = useRef([]);
+
   const handleAnswer = (index) => {
     if (selectedAnswer !== null) return;
     const correctAnswers = Array.isArray(question.correct)
@@ -222,15 +224,23 @@ function Quiz() {
     setSelectedAnswer(index);
     setWasCorrect(correct);
     if (correct) setScore((s) => s + 1);
-    setTimeout(() => setShowCorrect(true), 800);
-    setTimeout(() => transitionTo(SCREEN_EXPLANATION), 1600);
+
+    // Gem timer-referencer så de kan ryddes op
+    const t1 = setTimeout(() => setShowCorrect(true), 800);
+    const t2 = setTimeout(() => transitionTo(SCREEN_EXPLANATION), 1600);
+    answerTimersRef.current = [t1, t2];
   };
 
   const handleNext = () => {
+    // Ryd eventuelle igangværende answer-timeouts
+    answerTimersRef.current.forEach(clearTimeout);
+    answerTimersRef.current = [];
+
     const nextQ = currentQ + 1;
     setSelectedAnswer(null);
     setShowCorrect(false);
-    setWasCorrect(null);
+    // wasCorrect nulstilles IKKE her — det sker efter fade-animationen
+
     if (nextQ >= t.questions.length) {
       incrementAttempts();
       const allScores = saveScore(score, t.questions.length);
@@ -238,8 +248,14 @@ function Quiz() {
       setStats(computed);
       transitionTo(SCREEN_RESULTS);
     } else {
-      setCurrentQ(nextQ);
-      transitionTo(SCREEN_QUESTION);
+      // Fade ud først, skift spørgsmål BAGEFTER så det gamle ikke vises med nyt indhold
+      setFadeIn(false);
+      setTimeout(() => {
+        setCurrentQ(nextQ);
+        setWasCorrect(null); // ← nulstilles først her så animationen er færdig
+        setScreen(SCREEN_QUESTION);
+        setFadeIn(true);
+      }, 300);
     }
   };
 
