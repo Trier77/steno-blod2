@@ -7,11 +7,11 @@ const WHEEL = {
   labelFontFamily: "Flama, sans-serif",
   labelFontSize: 15,
   labelSubFontSize: 13,
-  labelColor: "var(--color-primary)",
-  labelSubColor: "var(--color-primary)",
+  labelColor: "var(--color-museum-cream)",
+  labelSubColor: "var(--color-museum-cream)",
   centerFontFamily: "Flama, sans-serif",
-  centerFontSize: 16,
-  centerFontColor: "#f2f1da",
+  centerFontSize: 22,
+  centerFontColor: "var(--color-primary)",
   hoverBrightness: 1.12,
   labelRadiusFraction: 0.5,
   labelAngleNudge: -5,
@@ -253,6 +253,7 @@ export default function CycleWheel({
         fill="var(--color-primary)"
         onClick={handleCenterTap}
         style={{ cursor: "pointer" }}
+        opacity={0.2}
       />
 
       {/* Center label — fades between normal text and hint text */}
