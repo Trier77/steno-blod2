@@ -17,6 +17,59 @@ const translations = {
         btn: "Start",
       },
     },
+    cyklus: {
+      centerLabel: ["Menstruations-", "cyklussens", "faser"],
+      // ─────────────────────────────────────────────────────
+      // Adjust 'degrees' to resize each slice. Must sum to 360.
+      // Adjust 'color' to change each slice's fill colour.
+      // Adjust 'video' to point to the correct video file.
+      // Adjust 'labelX' / 'labelY' to nudge the label position.
+      //   labelX: positive = right, negative = left
+      //   labelY: positive = down,  negative = up
+      // ─────────────────────────────────────────────────────
+      phases: [
+        {
+          id: "menstruation",
+          name: "Menstruation",
+          sub: "fase 1",
+          degrees: 60,
+          color: "#8B1A2A",
+          video: "/videos/fase1.mp4",
+          labelX: 50,
+          labelY: 40,
+        },
+        {
+          id: "follikulaer",
+          name: "Den follikulære fase",
+          sub: "fase 2",
+          degrees: 100,
+          color: "#D4829A",
+          video: "/videos/fase2.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+        {
+          id: "aeglosning",
+          name: "Ægløsning",
+          sub: "fase 3",
+          degrees: 30,
+          color: "#E8C84A",
+          video: "/videos/fase3.mp4",
+          labelX: -70,
+          labelY: 0,
+        },
+        {
+          id: "luteal",
+          name: "Den luteale fase",
+          sub: "fase 4",
+          degrees: 170,
+          color: "#C4A0D4",
+          video: "/videos/fase4.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+      ],
+    },
     quiz: {
       title: "Quiz",
       intro:
@@ -171,6 +224,51 @@ const translations = {
         body: "Test your knowledge about the exhibition",
         btn: "Start",
       },
+    },
+    cyklus: {
+      centerLabel: ["The menstrual", "cycle's", "phases"],
+      phases: [
+        {
+          id: "menstruation",
+          name: "Menstruation",
+          sub: "phase 1",
+          degrees: 60,
+          color: "#8B1A2A",
+          video: "/videos/fase1.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+        {
+          id: "follikulaer",
+          name: "The follicular phase",
+          sub: "phase 2",
+          degrees: 100,
+          color: "#D4829A",
+          video: "/videos/fase2.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+        {
+          id: "aeglosning",
+          name: "Ovulation",
+          sub: "phase 3",
+          degrees: 30,
+          color: "#E8C84A",
+          video: "/videos/fase3.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+        {
+          id: "luteal",
+          name: "The luteal phase",
+          sub: "phase 4",
+          degrees: 170,
+          color: "#C4A0D4",
+          video: "/videos/fase4.mp4",
+          labelX: 0,
+          labelY: 0,
+        },
+      ],
     },
     quiz: {
       title: "Quiz",

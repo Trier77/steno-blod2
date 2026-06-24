@@ -36,7 +36,7 @@ function BackButton({ onClick }) {
         {/* Main blob — museum blue */}
         <path
           d={path}
-          fill="var(--color-museum-cream, #f2f1da)"
+          fill="var(--color-museum-blue)"
           transform="translate(100 100)"
         />
         {/* Arrow */}
