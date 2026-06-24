@@ -6,6 +6,7 @@ import { BlobProvider, useBlob } from "./context/BlobContext";
 import translations from "../translations";
 import Quiz from "./pages/Quiz";
 import VideoPage from "./pages/VideoPage";
+import Cyklus from "./pages/Cyklus";
 import FlagButton from "./components/FlagButton";
 import questionIcon from "./assets/icons/question.png";
 import playIcon from "./assets/icons/play-button.png";
@@ -28,34 +29,34 @@ const VIDEO_EXPAND_SCALE = 35 / 9;
 const CYKLUS_EXPAND_SCALE = 35 / 8;
 
 // ─────────────────────────────────────────────────────────────
-// QUIZ BLOB IKONER — juster hvert ikon her
-// x, y        → placering inde i blobben (-60 til 60 ca.)
-// size        → størrelse
-// opacity     → synlighed (0.05 = meget subtil, 0.3 = tydelig)
-// rotation    → grader (0-360)
+// QUIZ BLOB IKONER
 // ─────────────────────────────────────────────────────────────
 const QUIZ_ICONS = [
   { x: -51, y: -50, size: 12, opacity: 0.3, rotation: -100 },
   { x: -24, y: 19, size: 14, opacity: 0.3, rotation: -110 },
   { x: -15, y: 29, size: 18, opacity: 0.3, rotation: 210 },
 ];
-// ─────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────
 // VIDEO BLOB IKON
-// x, y        → placering inde i blobben
-// size        → størrelse
-// opacity     → synlighed
-// rotation    → grader
 // ─────────────────────────────────────────────────────────────
 const VIDEO_ICON = { x: -20, y: -20, size: 45, opacity: 0.15, rotation: 0 };
-// ─────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────
-// CYKLUS BLOB IKONER — tilføj ikoner her senere, samme mønster som QUIZ_ICONS
+// CYKLUS BLOB IKONER — tilføj ikoner her senere
 // ─────────────────────────────────────────────────────────────
 const CYKLUS_ICONS = [];
+
 // ─────────────────────────────────────────────────────────────
+// How far each blob flies off screen during the cyklus transition.
+// Each blob flies toward its nearest corner.
+// Increase values if blobs don't fully leave the screen.
+// ─────────────────────────────────────────────────────────────
+const CYKLUS_EXIT = {
+  cyklus: "translate(-900px, -700px)", // top-left  → flies further top-left
+  video: "translate(900px, -700px)", // top-right → flies further top-right
+  quiz: "translate(400px, 800px)", // bottom-center → flies down
+};
 
 function WaveText({
   lines,
@@ -154,25 +155,52 @@ function IconWaveText({
 function PersistentBackground() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { expanded, setExpanded, videoExpanded, setVideoExpanded } = useBlob();
+  const {
+    expanded,
+    setExpanded,
+    videoExpanded,
+    setVideoExpanded,
+    cyklusTransitioning,
+    setCyklusTransitioning,
+  } = useBlob();
   const { language } = useLanguage();
   const blobs = translations[language].startside.blobs;
 
+  // ── Quiz ────────────────────────────────────────────────────
   const [quizExpanding, setQuizExpanding] = useState(false);
   const [quizPressed, setQuizPressed] = useState(false);
   const [quizTextVisible, setQuizTextVisible] = useState(true);
+  const [quizIconsVisible, setQuizIconsVisible] = useState(true);
 
+  // ── Video ───────────────────────────────────────────────────
   const [videoExpanding, setVideoExpanding] = useState(false);
   const [videoPressed, setVideoPressed] = useState(false);
   const [videoTextVisible, setVideoTextVisible] = useState(true);
   const [videoOnTop, setVideoOnTop] = useState(false);
 
-  const [cyklusExpanded, setCyklusExpanded] = useState(false);
-  const [cyklusExpanding, setCyklusExpanding] = useState(false);
+  // ── Cyklus ──────────────────────────────────────────────────
   const [cyklusPressed, setCyklusPressed] = useState(false);
   const [cyklusTextVisible, setCyklusTextVisible] = useState(true);
-  const [cyklusOnTop, setCyklusOnTop] = useState(false);
 
+  // "out"  → blobs flying off screen  (navigating to cyklus)
+  // "in"   → blobs flying back in     (returning from cyklus)
+  // null   → resting normally
+  const [cyklusFlight, setCyklusFlight] = useState(null);
+
+  const onStartPage = location.pathname === "/";
+  const blobsExited = cyklusFlight === "out";
+  // Only lock out taps when blobs are flying *away* — not when flying back in
+  const anyExpanded = expanded || videoExpanded || cyklusFlight === "out";
+
+  // The CSS transition string — ease-in when flying out, ease-out when flying back in
+  const flightTransition =
+    cyklusFlight === "out"
+      ? "transform 0.8s cubic-bezier(0.4, 0, 1, 1)"
+      : cyklusFlight === "in"
+        ? "transform 0.8s cubic-bezier(0, 0, 0.2, 1)"
+        : "none";
+
+  // ── Video z-index ───────────────────────────────────────────
   useEffect(() => {
     if (videoExpanded) {
       setVideoOnTop(true);
@@ -182,34 +210,22 @@ function PersistentBackground() {
     }
   }, [videoExpanded]);
 
-  useEffect(() => {
-    if (cyklusExpanded) {
-      setCyklusOnTop(true);
-    } else {
-      const id = setTimeout(() => setCyklusOnTop(false), 1600);
-      return () => clearTimeout(id);
-    }
-  }, [cyklusExpanded]);
-
-  const onStartPage = location.pathname === "/";
-  const anyExpanded = expanded || videoExpanded || cyklusExpanded;
-
-  const [quizIconsVisible, setQuizIconsVisible] = useState(true);
-
+  // ── Quiz text / icon visibility ─────────────────────────────
   useEffect(() => {
     if (expanded) {
       setQuizTextVisible(false);
       setQuizIconsVisible(false);
     } else {
-      const textId = setTimeout(() => setQuizTextVisible(true), 1300);
-      const iconId = setTimeout(() => setQuizIconsVisible(true), 1300);
+      const t = setTimeout(() => setQuizTextVisible(true), 1300);
+      const i = setTimeout(() => setQuizIconsVisible(true), 1300);
       return () => {
-        clearTimeout(textId);
-        clearTimeout(iconId);
+        clearTimeout(t);
+        clearTimeout(i);
       };
     }
   }, [expanded]);
 
+  // ── Video text visibility ───────────────────────────────────
   useEffect(() => {
     if (videoExpanded) {
       setVideoTextVisible(false);
@@ -219,15 +235,30 @@ function PersistentBackground() {
     }
   }, [videoExpanded]);
 
+  // ── Cyklus text visibility ──────────────────────────────────
   useEffect(() => {
-    if (cyklusExpanded) {
+    if (cyklusFlight === "out") {
+      // Hide immediately as blobs fly away
       setCyklusTextVisible(false);
-    } else {
-      const id = setTimeout(() => setCyklusTextVisible(true), 1300);
+    } else if (cyklusFlight === "in") {
+      // Fade text back in partway through the fly-in animation
+      const id = setTimeout(() => setCyklusTextVisible(true), 400);
       return () => clearTimeout(id);
     }
-  }, [cyklusExpanded]);
+  }, [cyklusFlight]);
 
+  // ── Detect return from cyklus page ─────────────────────────
+  // Cyklus.jsx navigates to "/" first, then sets this flag on the
+  // next tick — so by the time we see it here we're already home.
+  useEffect(() => {
+    if (!cyklusTransitioning) return;
+    setCyklusTransitioning(false);
+    setCyklusFlight("in");
+    const id = setTimeout(() => setCyklusFlight(null), 900);
+    return () => clearTimeout(id);
+  }, [cyklusTransitioning]);
+
+  // ── Tap handlers ────────────────────────────────────────────
   const handleQuizTap = () => {
     if (quizExpanding || anyExpanded) return;
     setQuizExpanding(true);
@@ -249,41 +280,36 @@ function PersistentBackground() {
   };
 
   const handleCyklusTap = () => {
-    if (cyklusExpanding || anyExpanded) return;
-    setCyklusExpanding(true);
-    setCyklusExpanded(true);
-    setTimeout(() => {
-      navigate("/cyklus");
-      setCyklusExpanding(false);
-    }, 1600);
+    if (cyklusFlight === "out" || anyExpanded) return;
+    setCyklusFlight("out");
+    setTimeout(() => navigate("/cyklus"), 850);
   };
 
   return (
     <>
       <style>{`
-        @keyframes blobPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        @keyframes blobPulse      { 0%, 100% { transform: scale(1);    } 50% { transform: scale(1.02); } }
         @keyframes blobPulseOuter { 0%, 100% { transform: scale(1.04); } 50% { transform: scale(1.06); } }
-        @keyframes letterWave { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
-        @keyframes textFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes letterWave     { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+        @keyframes textFloat      { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
       `}</style>
 
       <div
         className="bg-museum-cream"
         style={{ position: "fixed", inset: 0, zIndex: 0 }}
       />
-
       <div
         style={{ position: "fixed", bottom: "12px", right: "12px", zIndex: 50 }}
       >
         <FlagButton />
       </div>
 
-      {/* Cyklus blob */}
+      {/* ─── Cyklus blob (top-left) ──────────────────────────── */}
       <div
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: cyklusOnTop ? 3 : 2,
+          zIndex: 2,
           overflow: "hidden",
           pointerEvents: "none",
         }}
@@ -299,66 +325,82 @@ function PersistentBackground() {
             pointerEvents: "none",
           }}
         >
+          {/* Outer g handles the fly-in/out. Inner g has the existing positioning. */}
           <g
-            transform="translate(200 -70) scale(9) rotate(20)"
-            onClick={handleCyklusTap}
-            onPointerDown={() => setCyklusPressed(true)}
-            onPointerUp={() => setCyklusPressed(false)}
-            onPointerLeave={() => setCyklusPressed(false)}
             style={{
-              cursor: onStartPage && !anyExpanded ? "pointer" : "default",
-              pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+              transform: blobsExited
+                ? CYKLUS_EXIT.cyklus
+                : "translate(0px, 0px)",
+              transition: flightTransition,
             }}
           >
-            <path
-              d={BLOB_TOP_LEFT}
-              fill="#3d1118"
+            <g
+              transform="translate(200 -70) scale(9) rotate(20)"
+              onClick={handleCyklusTap}
+              onPointerDown={() => setCyklusPressed(true)}
+              onPointerUp={() => setCyklusPressed(false)}
+              onPointerLeave={() => setCyklusPressed(false)}
               style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                animation:
-                  cyklusExpanded || cyklusPressed
+                cursor: onStartPage && !anyExpanded ? "pointer" : "default",
+                pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+              }}
+            >
+              <path
+                d={BLOB_TOP_LEFT}
+                fill="#3d1118"
+                style={{
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  animation: cyklusPressed
                     ? "none"
                     : "blobPulseOuter 3s ease-in-out infinite 0.5s",
-                transition: "transform 1.5s ease-in-out",
-                transform: cyklusExpanded
-                  ? `scale(${CYKLUS_EXPAND_SCALE * 1.04})`
-                  : "scale(1.04)",
-              }}
-            />
-            <path
-              d={BLOB_TOP_LEFT}
-              fill="#631d27"
-              style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                filter:
-                  cyklusPressed && !cyklusExpanded
-                    ? "brightness(0.75)"
-                    : "brightness(1)",
-                animation:
-                  cyklusExpanded || cyklusPressed
+                  transform: "scale(1.04)",
+                }}
+              />
+              <path
+                d={BLOB_TOP_LEFT}
+                fill="#631d27"
+                style={{
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  filter: cyklusPressed ? "brightness(0.75)" : "brightness(1)",
+                  animation: cyklusPressed
                     ? "none"
                     : "blobPulse 3s ease-in-out infinite 0.5s",
-                transition: "transform 1.5s ease-in-out, filter 0.2s ease",
-                transform: cyklusExpanded
-                  ? `scale(${CYKLUS_EXPAND_SCALE})`
-                  : "scale(1)",
-              }}
+                  transition: "filter 0.2s ease",
+                  transform: "scale(1)",
+                }}
+              />
+              {CYKLUS_ICONS.map((icon, i) => (
+                <image
+                  key={i}
+                  href={icon.src}
+                  x={icon.x}
+                  y={icon.y}
+                  width={icon.size}
+                  height={icon.size}
+                  style={{
+                    transformBox: "fill-box",
+                    transformOrigin: "center",
+                    transform: `rotate(${icon.rotation}deg)`,
+                    opacity: icon.opacity,
+                  }}
+                />
+              ))}
+            </g>
+            <WaveText
+              lines={blobs.cyklus}
+              x={400}
+              y={240}
+              animationDelay={0.5}
+              fade={!cyklusTextVisible}
+              fontSize={60}
             />
           </g>
-          <WaveText
-            lines={blobs.cyklus}
-            x={400}
-            y={240}
-            animationDelay={0.5}
-            fade={!cyklusTextVisible}
-            fontSize={60}
-          />
         </svg>
       </div>
 
-      {/* Video blob */}
+      {/* ─── Video blob (top-right) ──────────────────────────── */}
       <div
         style={{
           position: "fixed",
@@ -380,68 +422,77 @@ function PersistentBackground() {
           }}
         >
           <g
-            transform="translate(1630 -150) scale(9.4) rotate(1)"
-            onClick={handleVideoTap}
-            onPointerDown={() => setVideoPressed(true)}
-            onPointerUp={() => setVideoPressed(false)}
-            onPointerLeave={() => setVideoPressed(false)}
             style={{
-              cursor: onStartPage && !anyExpanded ? "pointer" : "default",
-              pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+              transform: blobsExited
+                ? CYKLUS_EXIT.video
+                : "translate(0px, 0px)",
+              transition: flightTransition,
             }}
           >
-            <path
-              d={BLOB_TOP_RIGHT}
-              fill="#3d1118"
+            <g
+              transform="translate(1630 -150) scale(9.4) rotate(1)"
+              onClick={handleVideoTap}
+              onPointerDown={() => setVideoPressed(true)}
+              onPointerUp={() => setVideoPressed(false)}
+              onPointerLeave={() => setVideoPressed(false)}
               style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                animation:
-                  videoExpanded || videoPressed
-                    ? "none"
-                    : "blobPulseOuter 3s ease-in-out infinite 1s",
-                transition: "transform 1.5s ease-in-out",
-                transform: videoExpanded
-                  ? `scale(${VIDEO_EXPAND_SCALE * 1.04})`
-                  : "scale(1.04)",
+                cursor: onStartPage && !anyExpanded ? "pointer" : "default",
+                pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
               }}
-            />
-            <path
-              d={BLOB_TOP_RIGHT}
-              fill="#631d27"
-              style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                filter:
-                  videoPressed && !videoExpanded
-                    ? "brightness(0.75)"
-                    : "brightness(1)",
-                animation:
-                  videoExpanded || videoPressed
-                    ? "none"
-                    : "blobPulse 3s ease-in-out infinite 1s",
-                transition: "transform 1.5s ease-in-out, filter 0.2s ease",
-                transform: videoExpanded
-                  ? `scale(${VIDEO_EXPAND_SCALE})`
-                  : "scale(1)",
-              }}
+            >
+              <path
+                d={BLOB_TOP_RIGHT}
+                fill="#3d1118"
+                style={{
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  animation:
+                    videoExpanded || videoPressed
+                      ? "none"
+                      : "blobPulseOuter 3s ease-in-out infinite 1s",
+                  transition: "transform 1.5s ease-in-out",
+                  transform: videoExpanded
+                    ? `scale(${VIDEO_EXPAND_SCALE * 1.04})`
+                    : "scale(1.04)",
+                }}
+              />
+              <path
+                d={BLOB_TOP_RIGHT}
+                fill="#631d27"
+                style={{
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  filter:
+                    videoPressed && !videoExpanded
+                      ? "brightness(0.75)"
+                      : "brightness(1)",
+                  animation:
+                    videoExpanded || videoPressed
+                      ? "none"
+                      : "blobPulse 3s ease-in-out infinite 1s",
+                  transition: "transform 1.5s ease-in-out, filter 0.2s ease",
+                  transform: videoExpanded
+                    ? `scale(${VIDEO_EXPAND_SCALE})`
+                    : "scale(1)",
+                }}
+              />
+            </g>
+            <IconWaveText
+              icon={playIcon}
+              lines={blobs.video}
+              x={1130}
+              y={200}
+              animationDelay={1}
+              fade={!videoTextVisible}
+              fontSize={60}
+              iconSize={140}
+              iconGap={25}
             />
           </g>
-          <IconWaveText
-            icon={playIcon}
-            lines={blobs.video}
-            x={1130}
-            y={200}
-            animationDelay={1}
-            fade={!videoTextVisible}
-            fontSize={60}
-            iconSize={140}
-            iconGap={25}
-          />
         </svg>
       </div>
 
-      {/* Quiz blob */}
+      {/* ─── Quiz blob (bottom-center) ───────────────────────── */}
       <div
         style={{
           position: "fixed",
@@ -463,79 +514,84 @@ function PersistentBackground() {
           }}
         >
           <g
-            transform="translate(750 1100) scale(9) rotate(120)"
-            onClick={handleQuizTap}
-            onPointerDown={() => setQuizPressed(true)}
-            onPointerUp={() => setQuizPressed(false)}
-            onPointerLeave={() => setQuizPressed(false)}
             style={{
-              cursor: onStartPage && !anyExpanded ? "pointer" : "default",
-              pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
+              transform: blobsExited ? CYKLUS_EXIT.quiz : "translate(0px, 0px)",
+              transition: flightTransition,
             }}
           >
-            <path
-              d={BLOB_BOTTOM_LEFT}
-              fill="#3d1118"
+            <g
+              transform="translate(750 1100) scale(9) rotate(120)"
+              onClick={handleQuizTap}
+              onPointerDown={() => setQuizPressed(true)}
+              onPointerUp={() => setQuizPressed(false)}
+              onPointerLeave={() => setQuizPressed(false)}
               style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                animation:
-                  expanded || quizPressed
-                    ? "none"
-                    : "blobPulseOuter 3s ease-in-out infinite 2s",
-                transition: "transform 1.5s ease-in-out",
-                transform: expanded
-                  ? `scale(${QUIZ_EXPAND_SCALE * 1.04})`
-                  : "scale(1.04)",
+                cursor: onStartPage && !anyExpanded ? "pointer" : "default",
+                pointerEvents: onStartPage && !anyExpanded ? "auto" : "none",
               }}
-            />
-            <path
-              d={BLOB_BOTTOM_LEFT}
-              fill="#631d27"
-              style={{
-                transformOrigin: "center",
-                transformBox: "fill-box",
-                filter:
-                  quizPressed && !expanded
-                    ? "brightness(0.75)"
-                    : "brightness(1)",
-                animation:
-                  expanded || quizPressed
-                    ? "none"
-                    : "blobPulse 3s ease-in-out infinite 2s",
-                transition: "transform 1.5s ease-in-out, filter 0.2s ease",
-                transform: expanded
-                  ? `scale(${QUIZ_EXPAND_SCALE})`
-                  : "scale(1)",
-              }}
-            />
-
-            {/* Icons rendered from QUIZ_ICONS config above */}
-            {QUIZ_ICONS.map((icon, i) => (
-              <image
-                key={i}
-                href={questionIcon}
-                x={icon.x}
-                y={icon.y}
-                width={icon.size}
-                height={icon.size}
+            >
+              <path
+                d={BLOB_BOTTOM_LEFT}
+                fill="#3d1118"
                 style={{
-                  transformBox: "fill-box",
                   transformOrigin: "center",
-                  transform: `rotate(${icon.rotation}deg)`,
-                  opacity: quizIconsVisible ? icon.opacity : 0,
-                  transition: "opacity 0.4s ease",
+                  transformBox: "fill-box",
+                  animation:
+                    expanded || quizPressed
+                      ? "none"
+                      : "blobPulseOuter 3s ease-in-out infinite 2s",
+                  transition: "transform 1.5s ease-in-out",
+                  transform: expanded
+                    ? `scale(${QUIZ_EXPAND_SCALE * 1.04})`
+                    : "scale(1.04)",
                 }}
               />
-            ))}
+              <path
+                d={BLOB_BOTTOM_LEFT}
+                fill="#631d27"
+                style={{
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  filter:
+                    quizPressed && !expanded
+                      ? "brightness(0.75)"
+                      : "brightness(1)",
+                  animation:
+                    expanded || quizPressed
+                      ? "none"
+                      : "blobPulse 3s ease-in-out infinite 2s",
+                  transition: "transform 1.5s ease-in-out, filter 0.2s ease",
+                  transform: expanded
+                    ? `scale(${QUIZ_EXPAND_SCALE})`
+                    : "scale(1)",
+                }}
+              />
+              {QUIZ_ICONS.map((icon, i) => (
+                <image
+                  key={i}
+                  href={questionIcon}
+                  x={icon.x}
+                  y={icon.y}
+                  width={icon.size}
+                  height={icon.size}
+                  style={{
+                    transformBox: "fill-box",
+                    transformOrigin: "center",
+                    transform: `rotate(${icon.rotation}deg)`,
+                    opacity: quizIconsVisible ? icon.opacity : 0,
+                    transition: "opacity 0.4s ease",
+                  }}
+                />
+              ))}
+            </g>
+            <WaveText
+              lines={blobs.quiz}
+              x={900}
+              y={990}
+              animationDelay={2}
+              fade={!quizTextVisible}
+            />
           </g>
-          <WaveText
-            lines={blobs.quiz}
-            x={900}
-            y={990}
-            animationDelay={2}
-            fade={!quizTextVisible}
-          />
         </svg>
       </div>
     </>
@@ -550,8 +606,7 @@ function AppInner() {
         <Route path="/" element={null} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/video/:id" element={<VideoPage />} />
-        <Route path="/cyklus" element={null} />
-        {/* Replace null with <CyklusPage /> when you build it */}
+        <Route path="/cyklus" element={<Cyklus />} />
       </Routes>
     </div>
   );
