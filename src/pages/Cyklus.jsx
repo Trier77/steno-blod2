@@ -109,32 +109,55 @@ export default function Cyklus() {
         <div
           style={{
             flex: 1,
-            maxWidth: "400px",
             marginLeft: "-100px",
+            marginRight: "-60px",
+            background: "var(--color-primary)",
+            padding: "40px",
+            borderRadius: "12px 0 0 12px",
+            alignSelf: "stretch",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
-          {/* Decorative line */}
-          <div
-            style={{
-              width: "48px",
-              height: "4px",
-              background: "var(--color-primary)",
-              borderRadius: "2px",
-              marginBottom: "24px",
-            }}
-          />
-          <p
-            style={{
-              fontFamily: "Flama, sans-serif",
-              fontSize: "2.35rem",
-              fontWeight: "400",
-              lineHeight: "1.65",
-              color: "var(--color-primary)",
-              margin: 0,
-            }}
-          >
-            {t.intro}
-          </p>
+          <div style={{ maxWidth: "480px" }}>
+            {/* Decorative line */}
+            <div
+              style={{
+                width: "48px",
+                height: "4px",
+                background: "var(--color-museum-cream)",
+                borderRadius: "2px",
+                marginBottom: "24px",
+              }}
+            />
+            <p
+              style={{
+                fontFamily: "Flama, sans-serif",
+                fontSize: "3rem",
+                fontWeight: "400",
+                lineHeight: "1.65",
+                color: "var(--color-museum-cream)",
+                margin: 0,
+                marginBottom: "1.5rem",
+              }}
+            >
+              {t.intro}
+            </p>
+            <p
+              style={{
+                fontFamily: "Flama, sans-serif",
+                fontSize: "1.9rem",
+                fontWeight: "400",
+                lineHeight: "1.65",
+                color: "var(--color-museum-cream)",
+                margin: 0,
+                opacity: 0.7,
+              }}
+            >
+              {t.introAction}
+            </p>
+          </div>
         </div>
       </div>
 
