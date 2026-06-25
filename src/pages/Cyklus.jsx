@@ -105,6 +105,7 @@ export default function Cyklus() {
           <CycleWheel
             phases={t.phases}
             centerLabel={t.centerLabel}
+            centerHint={t.centerHint}
             onPhaseClick={setActivePhase}
           />
         </motion.div>

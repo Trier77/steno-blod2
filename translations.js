@@ -19,6 +19,7 @@ const translations = {
     },
     cyklus: {
       centerLabel: ["Menstruations-", "cyklussens", "faser"],
+      centerHint: ["Klik på", "faserne for", "at se mere"],
       intro:
         "Menstruationen er en del af kvindekroppens cyklus, som varer mellem 23 og 35 dage.",
       introAction:
@@ -232,6 +233,7 @@ const translations = {
     },
     cyklus: {
       centerLabel: ["The menstrual", "cycle's", "phases"],
+      centerHint: ["Tap the", "phases to", "learn more"],
       intro:
         "Menstruation is part of the female body's cycle, which lasts between 23 and 35 days.",
       introAction:

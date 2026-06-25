@@ -83,6 +83,7 @@ export default function CycleWheel({
   phases,
   percentages = [12, 18, 6, 30],
   centerLabel,
+  centerHint = [],
   onPhaseClick,
 }) {
   const [hovered, setHovered] = useState(null);
@@ -211,7 +212,6 @@ export default function CycleWheel({
         const x = baseX + (phase.labelX ?? 0);
         const y = baseY + (phase.labelY ?? 0);
 
-        // name can be a string or an array of strings for line breaks
         const nameLines = Array.isArray(phase.name) ? phase.name : [phase.name];
         const lineHeight = labelFontSize * 1.2;
         const totalNameHeight = (nameLines.length - 1) * lineHeight;
@@ -251,7 +251,7 @@ export default function CycleWheel({
         );
       })}
 
-      {/* Center disc — filled with primary color, gap between it and the arrows */}
+      {/* Center disc */}
       <circle
         cx={CX}
         cy={CY}
@@ -295,42 +295,21 @@ export default function CycleWheel({
           pointerEvents: "none",
         }}
       >
-        <text
-          x={CX}
-          y={CY - 22}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontFamily={centerFontFamily}
-          fontWeight="600"
-          fontSize={centerFontSize}
-          fill={centerFontColor}
-        >
-          Klik på
-        </text>
-        <text
-          x={CX}
-          y={CY}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontFamily={centerFontFamily}
-          fontWeight="600"
-          fontSize={centerFontSize}
-          fill={centerFontColor}
-        >
-          faserne for
-        </text>
-        <text
-          x={CX}
-          y={CY + 22}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontFamily={centerFontFamily}
-          fontWeight="600"
-          fontSize={centerFontSize}
-          fill={centerFontColor}
-        >
-          at se mere
-        </text>
+        {centerHint.map((line, i) => (
+          <text
+            key={i}
+            x={CX}
+            y={CY - ((centerHint.length - 1) * 22) / 2 + i * 22}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontFamily={centerFontFamily}
+            fontWeight="600"
+            fontSize={centerFontSize}
+            fill={centerFontColor}
+          >
+            {line}
+          </text>
+        ))}
       </g>
     </svg>
   );
