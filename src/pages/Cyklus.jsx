@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { motion } from "framer-motion";
 import { useBlob } from "../context/BlobContext";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../../translations";
@@ -88,8 +89,11 @@ export default function Cyklus() {
       >
         <BackButton onClick={handleBackToStart} />
 
-        {/* Wheel — left side */}
-        <div
+        {/* Wheel — slides in from the left */}
+        <motion.div
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : -40 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
           style={{
             width: "min(125vh, 125vw)",
             height: "min(125vh, 125vw)",
@@ -103,10 +107,13 @@ export default function Cyklus() {
             centerLabel={t.centerLabel}
             onPhaseClick={setActivePhase}
           />
-        </div>
+        </motion.div>
 
-        {/* Intro text — right side */}
-        <div
+        {/* Intro text panel — slides in from the right */}
+        <motion.div
+          initial={{ opacity: 0, x: 80 }}
+          animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : 80 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.25 }}
           style={{
             flex: 1,
             marginLeft: "-100px",
@@ -121,17 +128,24 @@ export default function Cyklus() {
           }}
         >
           <div style={{ maxWidth: "480px" }}>
-            {/* Decorative line */}
-            <div
+            {/* Decorative line — grows in */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: visible ? "48px" : 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
               style={{
-                width: "48px",
                 height: "4px",
                 background: "var(--color-museum-cream)",
                 borderRadius: "2px",
                 marginBottom: "24px",
               }}
             />
-            <p
+
+            {/* Main intro text — fades up */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.7 }}
               style={{
                 fontFamily: "Flama, sans-serif",
                 fontSize: "3rem",
@@ -143,8 +157,13 @@ export default function Cyklus() {
               }}
             >
               {t.intro}
-            </p>
-            <p
+            </motion.p>
+
+            {/* Action text — fades up slightly after */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: visible ? 0.7 : 0, y: visible ? 0 : 16 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.85 }}
               style={{
                 fontFamily: "Flama, sans-serif",
                 fontSize: "1.9rem",
@@ -152,13 +171,12 @@ export default function Cyklus() {
                 lineHeight: "1.65",
                 color: "var(--color-museum-cream)",
                 margin: 0,
-                opacity: 0.7,
               }}
             >
               {t.introAction}
-            </p>
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* ── Video overlay ── */}
