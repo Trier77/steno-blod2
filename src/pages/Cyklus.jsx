@@ -94,7 +94,7 @@ export default function Cyklus() {
             width: "min(125vh, 125vw)",
             height: "min(125vh, 125vw)",
             position: "relative",
-            left: "-200px",
+            left: "-60px",
             flexShrink: 0,
           }}
         >
