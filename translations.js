@@ -19,6 +19,8 @@ const translations = {
     },
     cyklus: {
       centerLabel: ["Menstruations-", "cyklussens", "faser"],
+      intro:
+        "Menstruationen er en del af kvindekroppens cyklus, som varer mellem 23 og 35 dage. Tryk på én af faserne, og hør mere om, hvad der sker i løbet af cyklussen.",
       // ─────────────────────────────────────────────────────
       // Adjust 'degrees' to resize each slice. Must sum to 360.
       // Adjust 'color' to change each slice's fill colour.
@@ -227,6 +229,8 @@ const translations = {
     },
     cyklus: {
       centerLabel: ["The menstrual", "cycle's", "phases"],
+      intro:
+        "Menstruation is part of the female body's cycle, which lasts between 23 and 35 days. Tap one of the phases to learn more about what happens during the cycle.",
       phases: [
         {
           id: "menstruation",

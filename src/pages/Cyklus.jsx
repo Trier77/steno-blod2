@@ -12,12 +12,10 @@ import CycleWheel from "../components/CycleWheel";
 function VideoOverlay({ phase, onBack }) {
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     const id = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(id);
   }, []);
-
   return (
     <div
       style={{
@@ -84,17 +82,20 @@ export default function Cyklus() {
           pointerEvents: visible && !activePhase ? "auto" : "none",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
+          padding: "0 60px",
         }}
       >
         <BackButton onClick={handleBackToStart} />
 
+        {/* Wheel — left side */}
         <div
           style={{
             width: "min(125vh, 125vw)",
             height: "min(125vh, 125vw)",
             position: "relative",
-            left: "-450px",
+            left: "-200px",
+            flexShrink: 0,
           }}
         >
           <CycleWheel
@@ -102,6 +103,38 @@ export default function Cyklus() {
             centerLabel={t.centerLabel}
             onPhaseClick={setActivePhase}
           />
+        </div>
+
+        {/* Intro text — right side */}
+        <div
+          style={{
+            flex: 1,
+            maxWidth: "400px",
+            marginLeft: "-100px",
+          }}
+        >
+          {/* Decorative line */}
+          <div
+            style={{
+              width: "48px",
+              height: "4px",
+              background: "var(--color-primary)",
+              borderRadius: "2px",
+              marginBottom: "24px",
+            }}
+          />
+          <p
+            style={{
+              fontFamily: "Flama, sans-serif",
+              fontSize: "2.35rem",
+              fontWeight: "400",
+              lineHeight: "1.65",
+              color: "var(--color-primary)",
+              margin: 0,
+            }}
+          >
+            {t.intro}
+          </p>
         </div>
       </div>
 
