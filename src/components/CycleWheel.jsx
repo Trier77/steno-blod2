@@ -5,7 +5,7 @@ import { useState } from "react";
 // ─────────────────────────────────────────────────────────────
 const WHEEL = {
   labelFontFamily: "Flama, sans-serif",
-  labelFontSize: 15,
+  labelFontSize: 20,
   labelSubFontSize: 13,
   labelColor: "var(--color-museum-cream)",
   labelSubColor: "var(--color-museum-cream)",
@@ -100,9 +100,7 @@ export default function CycleWheel({
   function handleCenterTap() {
     if (centerTapped) return;
     setCenterTapped(true);
-    // Small delay before fade in so React has rendered the hint at opacity 0 first
     setTimeout(() => setHintVisible(true), 20);
-    // Fade out after 3.5s, then reset after fade completes
     setTimeout(() => setHintVisible(false), 3500);
     setTimeout(() => setCenterTapped(false), 4000);
   }
@@ -213,26 +211,34 @@ export default function CycleWheel({
         const x = baseX + (phase.labelX ?? 0);
         const y = baseY + (phase.labelY ?? 0);
 
+        // name can be a string or an array of strings for line breaks
+        const nameLines = Array.isArray(phase.name) ? phase.name : [phase.name];
+        const lineHeight = labelFontSize * 1.2;
+        const totalNameHeight = (nameLines.length - 1) * lineHeight;
+
         return (
           <g
             key={phase.id + "-lbl"}
             transform={`rotate(${f(rotateDeg)}, ${f(x)}, ${f(y)})`}
             style={{ pointerEvents: "none" }}
           >
+            {nameLines.map((line, li) => (
+              <text
+                key={li}
+                x={x}
+                y={y - totalNameHeight / 2 + li * lineHeight - 8}
+                textAnchor="middle"
+                fontFamily={labelFontFamily}
+                fontWeight="700"
+                fontSize={labelFontSize}
+                fill={labelColor}
+              >
+                {line}
+              </text>
+            ))}
             <text
               x={x}
-              y={y - 10}
-              textAnchor="middle"
-              fontFamily={labelFontFamily}
-              fontWeight="700"
-              fontSize={labelFontSize}
-              fill={labelColor}
-            >
-              {phase.name}
-            </text>
-            <text
-              x={x}
-              y={y + 10}
+              y={y + totalNameHeight / 2 + labelFontSize * 0.4 + 4}
               textAnchor="middle"
               fontFamily={labelFontFamily}
               fontWeight="400"
@@ -255,8 +261,6 @@ export default function CycleWheel({
         style={{ cursor: "pointer" }}
         opacity={0.2}
       />
-
-      {/* Center label — fades between normal text and hint text */}
 
       {/* Normal label — fades out when tapped */}
       <g

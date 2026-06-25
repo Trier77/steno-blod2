@@ -91,8 +91,8 @@ export default function Cyklus() {
 
         <div
           style={{
-            width: "min(110vh, 110vw)",
-            height: "min(110vh, 110vw)",
+            width: "min(125vh, 125vw)",
+            height: "min(125vh, 125vw)",
             position: "relative",
             left: "-450px",
           }}
