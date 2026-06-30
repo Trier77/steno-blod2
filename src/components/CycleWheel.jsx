@@ -60,8 +60,12 @@ function buildBody(startDeg, endDeg) {
 }
 
 function buildTip(endDeg) {
-  const outerWing = polarPt(R_OUTER, endDeg);
-  const innerWing = polarPt(R_INNER, endDeg);
+  // Pull the base back slightly INTO the slice's own body so it overlaps
+  // rather than meeting at an exact seam — this avoids the thin gap/line
+  // that can appear at certain zoom levels due to anti-aliasing.
+  const BASE_OVERLAP_DEG = 0.8;
+  const outerWing = polarPt(R_OUTER, endDeg - BASE_OVERLAP_DEG);
+  const innerWing = polarPt(R_INNER, endDeg - BASE_OVERLAP_DEG);
   const tip = polarPt(R_MID, endDeg + TIP_OVERLAP_DEG);
   return [
     `M ${f(outerWing[0])} ${f(outerWing[1])}`,
