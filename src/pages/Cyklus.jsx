@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useBlob } from "../context/BlobContext";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../../translations";
@@ -8,15 +8,130 @@ import BackButton from "../components/BackButton";
 import CycleWheel from "../components/CycleWheel";
 
 // ─────────────────────────────────────────────────────────────
-// Video overlay — fades to black and plays the phase video
+// "What's next" overlay — shown when a video finishes playing.
+// Offers: play next phase, or go back to the wheel.
+// Tapping outside the card also returns to the wheel.
 // ─────────────────────────────────────────────────────────────
-function VideoOverlay({ phase, onBack }) {
+function VideoEndOverlay({ t, hasNext, onNext, onBackToWheel }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      onClick={onBackToWheel}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 30,
+        background: "rgba(0,0,0,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16, scale: 0.96 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "var(--color-museum-cream)",
+          borderRadius: "16px",
+          padding: "48px",
+          maxWidth: "520px",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "Flama, sans-serif",
+            fontSize: "1.6rem",
+            fontWeight: "500",
+            color: "var(--color-primary)",
+            lineHeight: "1.5",
+            margin: 0,
+            marginBottom: "32px",
+          }}
+        >
+          {t.videoEndQuestion}
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {hasNext && (
+            <button
+              onClick={onNext}
+              style={{
+                fontFamily: "Flama, sans-serif",
+                fontSize: "1.2rem",
+                fontWeight: "600",
+                color: "var(--color-museum-cream)",
+                background: "var(--color-primary)",
+                border: "none",
+                borderRadius: "999px",
+                padding: "16px 32px",
+                cursor: "pointer",
+              }}
+            >
+              {t.videoEndNext}
+            </button>
+          )}
+          <button
+            onClick={onBackToWheel}
+            style={{
+              fontFamily: "Flama, sans-serif",
+              fontSize: "1.2rem",
+              fontWeight: "600",
+              color: "var(--color-primary)",
+              background: "transparent",
+              border: "2px solid var(--color-primary)",
+              borderRadius: "999px",
+              padding: "14px 32px",
+              cursor: "pointer",
+            }}
+          >
+            {t.videoEndBack}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Video overlay — fades to black, plays the phase video,
+// then shows the "what's next" overlay when it ends.
+// ─────────────────────────────────────────────────────────────
+function VideoOverlay({ phase, phases, t, onBack, onPlayPhase }) {
   const videoRef = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [showEndOverlay, setShowEndOverlay] = useState(false);
+
   useEffect(() => {
     const id = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(id);
   }, []);
+
+  // Reset the end-overlay state whenever the phase changes
+  // (e.g. user taps "next phase")
+  useEffect(() => {
+    setShowEndOverlay(false);
+  }, [phase]);
+
+  const currentIndex = phases.findIndex((p) => p.id === phase.id);
+  const isLastPhase = currentIndex === phases.length - 1;
+  const nextPhase = !isLastPhase ? phases[currentIndex + 1] : null;
+
+  const handleVideoEnded = () => {
+    if (isLastPhase) {
+      // Last phase finished — just close and return to the wheel
+      onBack();
+    } else {
+      setShowEndOverlay(true);
+    }
+  };
+
   return (
     <div
       style={{
@@ -33,14 +148,27 @@ function VideoOverlay({ phase, onBack }) {
     >
       <video
         ref={videoRef}
+        key={phase.id}
         src={phase.video}
         autoPlay
         controls
+        onEnded={handleVideoEnded}
         style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
       <div style={{ position: "absolute", top: 0, left: 0 }}>
         <BackButton onClick={onBack} />
       </div>
+
+      <AnimatePresence>
+        {showEndOverlay && (
+          <VideoEndOverlay
+            t={t}
+            hasNext={!!nextPhase}
+            onNext={() => nextPhase && onPlayPhase(nextPhase)}
+            onBackToWheel={onBack}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -182,7 +310,13 @@ export default function Cyklus() {
 
       {/* ── Video overlay ── */}
       {activePhase && (
-        <VideoOverlay phase={activePhase} onBack={() => setActivePhase(null)} />
+        <VideoOverlay
+          phase={activePhase}
+          phases={t.phases}
+          t={t}
+          onBack={() => setActivePhase(null)}
+          onPlayPhase={setActivePhase}
+        />
       )}
     </>
   );

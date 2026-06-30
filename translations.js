@@ -24,6 +24,10 @@ const translations = {
         "Menstruationen er en del af kvindekroppens cyklus, som varer mellem 23 og 35 dage.",
       introAction:
         "Tryk på én af faserne, og hør mere om, hvad der sker i løbet af cyklussen.",
+      videoEndQuestion:
+        "Vil du høre om den næste fase i menstruationen, eller vil du tilbage til oversigt?",
+      videoEndNext: "Næste fase",
+      videoEndBack: "Tilbage til oversigt",
 
       // ─────────────────────────────────────────────────────
       // Adjust 'degrees' to resize each slice. Must sum to 360.
@@ -238,6 +242,10 @@ const translations = {
         "Menstruation is part of the female body's cycle, which lasts between 23 and 35 days.",
       introAction:
         "Tap one of the phases to learn more about what happens during the cycle.",
+      videoEndQuestion:
+        "Would you like to hear about the next phase, or go back to the overview?",
+      videoEndNext: "Next phase",
+      videoEndBack: "Back to overview",
 
       phases: [
         {
