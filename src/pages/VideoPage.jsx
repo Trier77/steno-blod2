@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useBlob } from "../context/BlobContext";
 import BackButton from "../components/BackButton";
-import BlodVidDA from "../assets/isabella2da.mp4";
+import BlodVidDA from "../assets/IsabelLyd.mp4";
 import BlodVidEN from "../assets/isabella2en.mp4";
 import { useLanguage } from "../context/LanguageContext";
 
