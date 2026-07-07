@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useBlob } from "../context/BlobContext";
 import BackButton from "../components/BackButton";
-import BlodVidDA from "../assets/IsabelLyd.mp4";
+import BlodVidDA from "../assets/Isamusik20.mp4";
 import BlodVidEN from "../assets/isabella2en.mp4";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -199,7 +199,7 @@ function VideoPage() {
           </button>
           <div
             ref={progressRef}
-            className="relative flex-1 h-2 bg-museum-cream/30 rounded-full cursor-pointer"
+            className="relative flex-1 h-3 bg-museum-cream/30 rounded-full cursor-pointer"
             onMouseDown={handlePointerDown}
             onMouseMove={handlePointerMove}
             onMouseUp={handlePointerUp}
@@ -209,9 +209,13 @@ function VideoPage() {
               className="absolute left-0 top-0 h-full bg-museum-cream rounded-full"
               style={{ width: `${progress * 100}%` }}
             />
+
+            {/* Håndtag */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-museum-cream shadow"
-              style={{ left: `calc(${progress * 100}% - 12px)` }}
+              className="absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-museum-cream shadow"
+              style={{ left: `calc(${progress * 100}% - 20px)` }}
+              onMouseDown={handlePointerDown}
+              onTouchStart={handlePointerDown}
             />
           </div>
           <span className="text-museum-cream text-3xl shrink-0 font-light">

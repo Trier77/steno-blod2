@@ -6,6 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import translations from "../../translations";
 import BackButton from "../components/BackButton";
 import CycleWheel from "../components/CycleWheel";
+import VideoControls from "../components/VideoControls";
 
 // ─────────────────────────────────────────────────────────────
 // "What's next" overlay — shown when a video finishes playing.
@@ -13,6 +14,8 @@ import CycleWheel from "../components/CycleWheel";
 // Tapping outside the card also returns to the wheel.
 // ─────────────────────────────────────────────────────────────
 function VideoEndOverlay({ t, hasNext, onNext, onBackToWheel }) {
+
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -151,10 +154,13 @@ function VideoOverlay({ phase, phases, t, onBack, onPlayPhase }) {
         key={phase.id}
         src={phase.video}
         autoPlay
-        controls
+        // controls
         onEnded={handleVideoEnded}
         style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
+      {/* Tilføj VideoControls */}
+      <VideoControls videoRef={videoRef} />
+      
       <div style={{ position: "absolute", top: 0, left: 0 }}>
         <BackButton onClick={onBack} />
       </div>

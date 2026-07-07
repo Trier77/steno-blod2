@@ -44,7 +44,7 @@ const translations = {
           sub: "fase 1",
           degrees: 60,
           color: "#631d27",
-          video: "/videos/fae1.mp4",
+          video: "/videos/fase1.mp4",
           labelX: 50,
           labelY: 40,
         },
