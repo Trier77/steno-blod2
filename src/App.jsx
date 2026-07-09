@@ -10,6 +10,7 @@ import Cyklus from "./pages/Cyklus";
 import FlagButton from "./components/FlagButton";
 import questionIcon from "./assets/icons/question.png";
 import playIcon from "./assets/icons/play-button.png";
+import hjulIcon from "./assets/icons/hjul.png";
 import "./App.css";
 
 const BLOB_TOP_LEFT = `
@@ -45,7 +46,7 @@ const VIDEO_ICON = { x: -20, y: -20, size: 45, opacity: 0.15, rotation: 0 };
 // ─────────────────────────────────────────────────────────────
 // CYKLUS BLOB IKONER — tilføj ikoner her senere
 // ─────────────────────────────────────────────────────────────
-const CYKLUS_ICONS = [];
+const CYKLUS_ICONS = [{x: -20, y: -30, size: 80, opacity: 0.55, rotation: 0}];
 
 // ─────────────────────────────────────────────────────────────
 // How far each blob flies off screen during the cyklus transition.
@@ -292,6 +293,7 @@ function PersistentBackground() {
         @keyframes blobPulseOuter { 0%, 100% { transform: scale(1.04); } 50% { transform: scale(1.06); } }
         @keyframes letterWave     { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
         @keyframes textFloat      { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes spinWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
 
       <div
@@ -374,7 +376,7 @@ function PersistentBackground() {
               {CYKLUS_ICONS.map((icon, i) => (
                 <image
                   key={i}
-                  href={icon.src}
+                  href={hjulIcon}
                   x={icon.x}
                   y={icon.y}
                   width={icon.size}
@@ -382,7 +384,7 @@ function PersistentBackground() {
                   style={{
                     transformBox: "fill-box",
                     transformOrigin: "center",
-                    transform: `rotate(${icon.rotation}deg)`,
+                    animation: "spinWheel 8s linear infinite",
                     opacity: icon.opacity,
                   }}
                 />

@@ -7,6 +7,7 @@ import translations from "../../translations";
 import BackButton from "../components/BackButton";
 import CycleWheel from "../components/CycleWheel";
 import VideoControls from "../components/VideoControls";
+import front from "../assets/front.gif"
 
 // ─────────────────────────────────────────────────────────────
 // "What's next" overlay — shown when a video finishes playing.
@@ -260,9 +261,39 @@ export default function Cyklus() {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            position: "relative", // ← tilføj denne
+            overflow: "hidden",   // ← så videoen ikke stikker ud over hjørnerne
           }}
         >
-          <div style={{ maxWidth: "480px" }}>
+
+            {/* Baggrundsvideo — kører i loop under teksten */}
+            <img
+              src={front}
+              alt=""
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                zIndex: 0,
+                opacity: 1,
+              }}
+            />
+
+            <div style={{
+              position: "relative",
+              zIndex: 1,
+              maxWidth: "480px",
+               // samme farve som primary men gennemsigtig
+              backdropFilter: "blur(12px)",
+              // border: "5px solid  rgba(255, 255, 255, 1)",
+              borderRadius: "12px",
+              
+            }}>
+  
+
+          
             {/* Decorative line — grows in */}
             <motion.div
               initial={{ width: 0 }}
@@ -310,7 +341,10 @@ export default function Cyklus() {
             >
               {t.introAction}
             </motion.p>
-          </div>
+          
+              
+            </div>
+          
         </motion.div>
       </div>
 
