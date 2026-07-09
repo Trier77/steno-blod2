@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useBlob } from "../context/BlobContext";
 import BackButton from "../components/BackButton";
-import BlodVidDA from "../assets/Isamusik20.mp4";
-import BlodVidEN from "../assets/isabella2en.mp4";
+import BlodVidDA from "../assets/isaDaMus.mp4";
+import BlodVidEN from "../assets/isaEnMus.mp4";
 import { useLanguage } from "../context/LanguageContext";
+import { useIdleTimeout } from "../hooks/idleTimeOut";
 
 const VIDEO_SOURCES = {
   da: [BlodVidDA, /* andre danske videoer */],
@@ -12,6 +13,7 @@ const VIDEO_SOURCES = {
 };
 
 function VideoPage() {
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const { setVideoExpanded } = useBlob();
@@ -55,6 +57,8 @@ function VideoPage() {
     setVideoExpanded(false);
     setTimeout(() => navigate("/"), 1600);
   };
+
+  useIdleTimeout(2, navigateHome);
 
   const togglePlay = () => {
     const video = videoRef.current;

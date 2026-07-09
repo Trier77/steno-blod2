@@ -8,6 +8,7 @@ import BackButton from "../components/BackButton";
 import CycleWheel from "../components/CycleWheel";
 import VideoControls from "../components/VideoControls";
 import front from "../assets/front.gif"
+import { useIdleTimeout } from "../hooks/idleTimeOut";
 
 // ─────────────────────────────────────────────────────────────
 // "What's next" overlay — shown when a video finishes playing.
@@ -184,6 +185,7 @@ function VideoOverlay({ phase, phases, t, onBack, onPlayPhase }) {
 // Cyklus page
 // ─────────────────────────────────────────────────────────────
 export default function Cyklus() {
+  
   const navigate = useNavigate();
   const { setCyklusTransitioning } = useBlob();
   const { language } = useLanguage();
@@ -204,6 +206,15 @@ export default function Cyklus() {
       setTimeout(() => setCyklusTransitioning(true), 50);
     }, 400);
   };
+
+  useIdleTimeout(2, handleBackToStart);
+
+  // Opdaterer activePhase med ny videosti når sproget skifter
+useEffect(() => {
+  if (!activePhase) return;
+  const updated = t.phases.find((p) => p.id === activePhase.id);
+  if (updated) setActivePhase(updated);
+}, [language])
 
   return (
     <>

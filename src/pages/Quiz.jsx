@@ -5,6 +5,7 @@ import { useBlob } from "../context/BlobContext";
 import translations from "../../translations";
 import BackButton from "../components/BackButton";
 import { motion } from "framer-motion";
+import { useIdleTimeout } from "../hooks/idleTimeOut";
 
 // ─────────────────────────────────────────────────────────────
 // QUESTION ICONS — importer dine SVG'er fra src/assets/icons her
@@ -173,6 +174,7 @@ const SCREEN_EXPLANATION = "explanation";
 const SCREEN_RESULTS = "results";
 
 function Quiz() {
+  
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { setExpanded } = useBlob();
@@ -212,6 +214,8 @@ function Quiz() {
     setExpanded(false);
     setTimeout(() => navigate("/"), 1600);
   };
+
+  useIdleTimeout(2, navigateHome);
 
   const answerTimersRef = useRef([]);
 

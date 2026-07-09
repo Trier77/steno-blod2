@@ -21,11 +21,11 @@ const translations = {
       centerLabel: ["Menstruations-", "cyklussens", "faser"],
       centerHint: ["Klik på", "faserne for", "at se mere"],
       intro:
-        "Menstruationen er en del af kvindekroppens cyklus, som varer mellem 23 og 35 dage.",
+        "Menstruation er en del af kvindekroppens cyklus, som varer mellem 23 og 35 dage.",
       introAction:
         "Tryk på én af faserne, og hør mere om, hvad der sker i løbet af cyklussen.",
       videoEndQuestion:
-        "Vil du høre om den næste fase i menstruationen, eller vil du tilbage til oversigt?",
+        "Vil du høre om den næste fase i menstruationscyklussen?",
       videoEndNext: "Næste fase",
       videoEndBack: "Tilbage til oversigt",
 
@@ -236,14 +236,14 @@ const translations = {
       },
     },
     cyklus: {
-      centerLabel: ["The menstrual", "cycle's", "phases"],
+      centerLabel: ["Phases of", "the menstrual", "cycle"],
       centerHint: ["Tap the", "phases to", "learn more"],
       intro:
         "Menstruation is part of the female body's cycle, which lasts between 23 and 35 days.",
       introAction:
-        "Tap one of the phases to learn more about what happens during the cycle.",
+        "Tap one of the phases to learn more about what happens throughout the cycle.",
       videoEndQuestion:
-        "Would you like to hear about the next phase, or go back to the overview?",
+        "Would you like to learn about the next phase of the mentrual cycle?",
       videoEndNext: "Next phase",
       videoEndBack: "Back to overview",
 
@@ -260,7 +260,7 @@ const translations = {
         },
         {
           id: "follikulaer",
-          name: ["The follicular", "phase"],
+          name: ["Follicular", "phase"],
           sub: "phase 2",
           degrees: 100,
           color: "#c47a8a",
@@ -280,7 +280,7 @@ const translations = {
         },
         {
           id: "luteal",
-          name: ["The luteal", "phase"],
+          name: ["Luteal", "phase"],
           sub: "phase 4",
           degrees: 170,
           color: "#6b8fa8",
